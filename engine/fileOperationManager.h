@@ -1,0 +1,39 @@
+#pragma once
+#ifndef FILEOPERATIONMANAGER_H
+#define FILEOPERATIONMANAGER_H
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+
+#if __cplusplus < 201703L || (!defined(_MSC_VER) && !defined(__cpp_lib_filesystem))
+#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#else
+#include <filesystem>
+namespace fs = std::filesystem;
+#endif
+
+
+
+void createFolder(std::string path);
+void createBinFile(std::string path, std::string name);
+void addToFileBytes(std::string path, const std::vector<uint8_t>& bytes);
+void deleteFile(std::string path);
+/*
+bool ifexists(std::string path) {
+    std::ifstream file;
+    file.open(path);
+    if (file)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+
+}
+*/
+#endif 

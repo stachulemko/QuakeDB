@@ -62,7 +62,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\binaryConverter.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\tlv.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.7\lib\native\v140\windesktop\msvcstl\static\rt-dyn\x64\Debug\gtest_maind.lib;C:\Users\KępkaStanisław\source\repos\QuakeDB\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.7\lib\native\v140\windesktop\msvcstl\static\rt-dyn\x64\Debug\gtestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\binaryConverter.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\tlv.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\column.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\table.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.7\lib\native\v140\windesktop\msvcstl\static\rt-dyn\x64\Debug\gtest_maind.lib;C:\Users\KępkaStanisław\source\repos\QuakeDB\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.7\lib\native\v140\windesktop\msvcstl\static\rt-dyn\x64\Debug\gtestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -109,6 +109,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="testColumn.cpp" />
+    <ClCompile Include="testDataBase.cpp" />
+    <ClCompile Include="testTable.cpp" />
     <ClCompile Include="testTlv.cpp" />
   </ItemGroup>
   <ItemGroup>

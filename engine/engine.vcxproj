@@ -21,12 +21,18 @@
   <ItemGroup>
     <ClCompile Include="binaryConverter.cpp" />
     <ClCompile Include="column.cpp" />
+    <ClCompile Include="dataBase.cpp" />
+    <ClCompile Include="fileOperationManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="table.cpp" />
     <ClCompile Include="tlv.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="binaryConverter.h" />
     <ClInclude Include="column.h" />
+    <ClInclude Include="dataBase.h" />
+    <ClInclude Include="fileOperationManager.h" />
+    <ClInclude Include="table.h" />
     <ClInclude Include="tlv.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

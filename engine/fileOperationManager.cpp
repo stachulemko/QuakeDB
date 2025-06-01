@@ -1,0 +1,67 @@
+#include "fileOperationManager.h"
+
+void createFolder(std::string path) {
+    try {
+        if (!fs::exists(path)) {
+            if (fs::create_directory(path)) {
+            }
+            else {
+                std::cerr << "Error: Failed to create folder '" << path << "'" << std::endl;
+            }
+        }
+        else {
+            std::cerr << "Error: Folder '" << path << "' already exists!" << std::endl;
+        }
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error while creating folder: " << e.what() << std::endl;
+    }
+}
+
+void createBinFile(std::string path, std::string name) {
+    std::string filePath = path + "/" + name + ".bin";
+    if (fs::exists(path)) {
+        std::ifstream fileCheck(filePath, std::ios::binary);
+        if (fileCheck) {
+            std::cerr << "Error: file " << filePath << " already exists" << std::endl;
+            fileCheck.close();
+            return;
+        }
+
+        std::ofstream newFile(filePath, std::ios::binary);
+        if (!newFile) {
+            std::cerr << "Error while making file " << filePath << "!" << std::endl;
+            return;
+        }
+        newFile.close();
+    }
+    else {
+		std::cerr << "Error path:  '" << filePath << "' does not exist!" << std::endl;
+    }
+   
+}
+void addToFileBytes(std::string path, const std::vector<uint8_t>& bytes) {
+    std::ofstream file(path, std::ios::binary | std::ios::app);
+    if (!file) {
+        std::cerr << "Error: Cannot open file " << path << " for appending!" << std::endl;
+        return;
+    }
+    if (!bytes.empty()) {
+        file.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+    }
+    file.close();
+}
+void deleteFile(std::string path) {
+    try {
+        if (fs::exists(path)) {
+            fs::remove(path);
+			std::cerr << "File '" << path << "' deleted successfully." << std::endl;
+        }
+        else {
+            std::cerr << "Error: File '" << path << "' does not exist!" << std::endl;
+        }
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error while deleting file: " << e.what() << std::endl;
+    }
+}
