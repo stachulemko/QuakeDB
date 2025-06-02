@@ -1,4 +1,4 @@
-#pragma once
+
 #ifndef TABLE_H  
 #define TABLE_H
 #include <string>
@@ -28,6 +28,28 @@ public:
 			result.insert(result.end(), columnBytes.begin(), columnBytes.end());
 		}
 		return result;
+    }
+    void LoadColumnsDefinition(std::vector<uint8_t> allBinary) {
+        size_t offset = 0;
+        int32_t size = 0;
+        int32_t type = 0;
+
+        while (offset + 4 <= allBinary.size()) {
+            std::vector<uint8_t> typeBinary(allBinary.begin() + offset, allBinary.begin() + offset + 4);
+            std::vector<uint8_t> sizeBinary(allBinary.begin() + offset + 4, allBinary.begin() + offset + 8);
+            UnmarshalInt32_t(&type, &typeBinary);
+            UnmarshalInt32_t(&size, &sizeBinary);
+            if (type == columnTypeId) {
+                Column* column = new Column("", 0, false);
+                column->loadAllBytesToDecode(std::vector<uint8_t>(allBinary.begin() + offset, allBinary.begin() + offset + 8 + size+24));
+                std::cout << "---------todecode-------" << std::endl;
+                showBytes(std::vector<uint8_t>(allBinary.begin() + offset, allBinary.begin() + offset + 8 + size+24));
+                std::cout << "---------todecode-------" << std::endl;
+                column->decodeColumn();
+                columns.push_back(column);
+                offset += 8 + size+24;
+            }
+        }
     }
 };
 

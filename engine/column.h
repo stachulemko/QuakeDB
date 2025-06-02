@@ -1,4 +1,4 @@
-#pragma once
+
 #ifndef COLUMN_H  
 #define COLUMN_H
 #include <iostream>

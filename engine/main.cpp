@@ -1,8 +1,7 @@
-#pragma once
+
 #include "column.h"
 #include "tlv.h"
 #include "dataBase.h"
-#include <Windows.h>
 int main() {
 	/*
     // Wyœwietl komunikat przed utworzeniem obiektu
@@ -30,15 +29,24 @@ int main() {
 	nullableColumn.showColumn();
 	std::cout << "------------------------------------" << std::endl;
     */
+	
+	
+	//Database dataBase;
+	//dataBase.addTable("klienci");
+	//dataBase.addTable("pracownicy");
+	//dataBase.addColumn("klienci", "id", 1, false);
+	//dataBase.addColumn("klienci", "name", 3, true);
+	//dataBase.addColumn("pracownicy", "id", 1, false);
+	//dataBase.commit();
+	
 
-	Database dataBase;
-	dataBase.addTable("klienci");
-	dataBase.addColumn("klienci", "id", 1, false);
-	dataBase.addColumn("klienci", "name", 3, false);
-	dataBase.addColumn("klienci", "age", 1, true);
-	dataBase.commit();
-	//Sleep(10000);
-	dataBase.showFile("klienci");
+	std::string ExecutionPath = executionFilePath();
+	std::cout << "Execution Path: " << ExecutionPath << std::endl;
+	//Database dataBase;
+	//dataBase.loadDataBase();
+	//dataBase.showFile();
+	//dataBase.loadDataBase();
+	//dataBase.showFile();
 	//Sleep(1000000);
 	//dataBase.sh/ow;
 // File("klienci");

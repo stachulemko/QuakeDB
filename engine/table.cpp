@@ -14,8 +14,8 @@ void Table::addColumn(std::string columnName, int type, bool allowNull) {
 }
 
 void Table::showTable() {
-    std::cout << "Table Name: " << tableName << std::endl;
-    std::cout << "Columns:" << std::endl;
+    //std::cout << "Table Name: " << tableName << std::endl;
+    //std::cout << "Columns:" << std::endl;
     for (const auto& column : columns) {
         column->showColumn();
     }

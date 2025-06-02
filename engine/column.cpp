@@ -165,6 +165,9 @@ void Column::decodeColumn() {
     else {
         std::cerr << "Invalid column type ID: " << type << std::endl;
     }
+	std::cout << "-------------Column decoded------------ "<< std::endl;
+	showColumn();
+    std::cout << "-------------Column decoded------------ " << std::endl;
 }
 
 void Column::clearAll() {

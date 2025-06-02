@@ -65,3 +65,49 @@ void deleteFile(std::string path) {
         std::cerr << "Error while deleting file: " << e.what() << std::endl;
     }
 }
+std::vector<uint8_t> readFileBytes(std::string path) {
+    std::vector<uint8_t> buffer;
+
+    if (!fs::exists(path)) {
+        std::cerr << "Error: File '" << path << "' does not exist!" << std::endl;
+        return buffer; 
+    }
+
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    if (!file) {
+        std::cerr << "Error: Cannot open file '" << path << "' for reading!" << std::endl;
+        return buffer; 
+    }
+
+    std::streamsize fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    if (fileSize == 0) {
+        std::cerr << "Warning: File '" << path << "' is empty." << std::endl;
+        return buffer;
+    }
+
+    buffer.resize(static_cast<size_t>(fileSize));
+
+    if (!file.read(reinterpret_cast<char*>(buffer.data()), fileSize)) {
+        std::cerr << "Error: Failed to read data from file '" << path << "'!" << std::endl;
+        buffer.clear(); 
+    }
+
+    file.close();
+    return buffer;
+}
+void showFileBytes(std::string path) {
+    std::vector<uint8_t> tmp = readFileBytes(path);
+    for (int i = 0; i < tmp.size(); i++) {
+        std::cout << std::bitset<8>(tmp[i]) << " ";
+
+    }
+}
+bool isFileExists(const std::string& path) {
+	return fs::exists(path);
+}
+std::string executionFilePath() {
+	std::string path = fs::current_path().string();
+	return path;
+}

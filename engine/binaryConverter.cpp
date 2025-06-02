@@ -57,3 +57,11 @@ void UnmarshalInt64_t(int64_t* val, std::vector<uint8_t>* int64InBinary) {
 void UnmarshalString(std::string* val, std::vector<uint8_t>* stringInBinary) {
     *val = std::string(stringInBinary->begin(), stringInBinary->end());
 }
+
+
+void showBytes(const std::vector<uint8_t>& bytes) {
+    for (int i = 0; i < bytes.size(); i++) {
+        std::cout << std::bitset<8>(bytes[i]) << " ";
+
+    }
+}

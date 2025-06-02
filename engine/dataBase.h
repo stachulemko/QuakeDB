@@ -1,4 +1,4 @@
-#pragma once
+
 #ifndef DATABASE_H  
 #define DATABASE_H
 #include <iostream>
@@ -7,6 +7,7 @@
 #include <fstream>
 #include "table.h"
 #include <cstdint>
+#include "fileOperationManager.h"
 
 class Database {
 private:
@@ -19,7 +20,8 @@ public:
     void addTable(std::string tableName);
     void addColumn(std::string tableName, std::string columnName, int dataType, bool allowNull);
     void clearAll();
-    void showFile(std::string tableName);
+    void showFile();
+    void loadDataBase();
     std::string getPath() {
 		return path;
     }

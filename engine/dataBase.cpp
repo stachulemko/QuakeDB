@@ -1,5 +1,5 @@
 #include "dataBase.h"
-#include "fileOperationManager.h"
+#include <filesystem>  
 
 Database::Database() {
     //path = "dataBaseMemoryManagment";
@@ -30,52 +30,12 @@ void Database::clearAll() {
     }
 }
 
-void Database::showFile(std::string tableName) {
-    std::string filePath = path + "/" + tableName + ".bin";
-    std::ifstream file(filePath, std::ios::binary);
-
-    if (!file) {
-        std::cerr << "B³¹d: Nie mo¿na otworzyæ pliku " << filePath << std::endl;
-        return;
+void Database::showFile() {
+    for (int i = 0; i < tables.size(); i++) {
+        tables[i]->showTable();
     }
-    file.seekg(0, std::ios::end);
-    size_t fileSize = static_cast<size_t>(file.tellg());
-    file.seekg(0, std::ios::beg);
-
-    if (fileSize == 0) {
-        std::cout << "Plik " << filePath << " jest pusty." << std::endl;
-        file.close();
-        return;
-    }
-
-
-    std::cout << "=== Plik: " << tableName << ".bin ===" << std::endl;
-    std::cout << "Rozmiar: " << fileSize << " bajtów" << std::endl;
-
-    std::vector<uint8_t> buffer(fileSize);
-    file.read(reinterpret_cast<char*>(buffer.data()), fileSize);
-
-    std::cout << "Zawartoœæ w bajtach:" << std::endl;
-    for (size_t i = 0; i < fileSize; ++i) {
-        std::cout << static_cast<int>(buffer[i]) << " ";
-        if ((i + 1) % 20 == 0) {
-            std::cout << std::endl;
-        }
-    }
-    std::cout << std::endl;
-
-    file.close();
-
-    for (auto& t : tables) {
-        if (t->getTableName() == tableName) {
-            std::cout << "\nStruktura tabeli:" << std::endl;
-            t->showTable();
-            return;
-        }
-    }
-
-    std::cout << "Tabela " << tableName << " nie jest wczytana do pamiêci." << std::endl;
 }
+
 void Database::commit() {
 
     for (auto& table : tables) {
@@ -88,4 +48,23 @@ void Database::commit() {
         addToFileBytes(path + "/" + tableName + ".bin", vec);
     }
 
+}
+void Database::loadDataBase() {
+    const std::string folder = path;
+	showFileBytes(folder + "/klienci.bin");
+	std::cout << "--------------------------" << std::endl;
+    try {
+        for (const auto& entry : fs::directory_iterator(folder)) {
+			if (!fs::is_directory(entry.status())) {
+				std::string fileName = entry.path().filename().string();
+				Table* table = new Table(fileName.substr(0, fileName.find_last_of('.')), folder);
+				std::vector<uint8_t> fileBytes = readFileBytes(entry.path().string());
+                table->LoadColumnsDefinition(fileBytes);
+                tables.push_back(table);
+            }
+        }
+    }
+    catch (const fs::filesystem_error& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
 }
