@@ -109,5 +109,8 @@ bool isFileExists(const std::string& path) {
 }
 std::string executionFilePath() {
 	std::string path = fs::current_path().string();
+    for (char& c : path) {
+        if (c == '\\') c = '/';
+    }
 	return path;
 }

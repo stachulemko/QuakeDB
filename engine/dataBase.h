@@ -21,6 +21,8 @@ public:
     void addColumn(std::string tableName, std::string columnName, int dataType, bool allowNull);
     void clearAll();
     void showFile();
+    std::vector<std::vector<std::string>> getTableColumnsNames();
+	std::vector<std::vector<std::vector<int32_t>>> getTypeAndAllowNUllTables();
     void loadDataBase();
     std::string getPath() {
 		return path;

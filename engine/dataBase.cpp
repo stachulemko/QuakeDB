@@ -3,6 +3,8 @@
 
 Database::Database() {
     //path = "dataBaseMemoryManagment";
+    //std::string tmpPath = executionFilePath() + "/" + path;
+	//std::cout << "tmpPath: " << tmpPath << std::endl;
     createFolder(path);
 }
 
@@ -67,4 +69,19 @@ void Database::loadDataBase() {
     catch (const fs::filesystem_error& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }
+}
+std::vector<std::vector<std::string>> Database::getTableColumnsNames() {
+    std::vector<std::vector<std::string>>tablesColumnNames;
+    for (int i = 0; i < tables.size(); i++) {
+        tablesColumnNames.push_back(tables[i]->getColumnName());
+    }
+    return tablesColumnNames;
+}
+
+std::vector<std::vector<std::vector<int32_t>>> Database::getTypeAndAllowNUllTables() {
+	std::vector<std::vector<std::vector<int32_t>>> typeAndAllowNullTables;
+	for (int i = 0; i < tables.size(); i++) {
+		typeAndAllowNullTables.push_back(tables[i]->getTypeAndAllowNUll());
+	}
+	return typeAndAllowNullTables;
 }

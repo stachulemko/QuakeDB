@@ -30,18 +30,18 @@ int main() {
 	std::cout << "------------------------------------" << std::endl;
     */
 	
-	
 	//Database dataBase;
+	
 	//dataBase.addTable("klienci");
 	//dataBase.addTable("pracownicy");
 	//dataBase.addColumn("klienci", "id", 1, false);
-	//dataBase.addColumn("klienci", "name", 3, true);
 	//dataBase.addColumn("pracownicy", "id", 1, false);
 	//dataBase.commit();
-	
+	//dataBase.addColumn("klienci", "name", 3, true);
+	Database dataBase;
 
-	std::string ExecutionPath = executionFilePath();
-	std::cout << "Execution Path: " << ExecutionPath << std::endl;
+	//std::string ExecutionPath = executionFilePath();
+	//std::cout << "Execution Path: " << ExecutionPath << std::endl;
 	//Database dataBase;
 	//dataBase.loadDataBase();
 	//dataBase.showFile();

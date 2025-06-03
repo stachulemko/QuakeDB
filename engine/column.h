@@ -23,10 +23,11 @@ public:
 
     int32_t getColumnSize();
     std::string getColumnName();
+
     int32_t getColumnType();
     bool isAllowNull();
-
     std::vector<uint8_t> MarshalColumn();
+
     void loadAllBytesToDecode(std::vector<uint8_t> bytes);
     void decodeColumn();
 

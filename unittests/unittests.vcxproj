@@ -58,11 +58,12 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>C:\Users\KępkaStanisław\source\repos\QuakeDB\engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\binaryConverter.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\tlv.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\column.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\table.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\fileOperationManager.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\dataBase.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.7\lib\native\v140\windesktop\msvcstl\static\rt-dyn\x64\Debug\gtest_maind.lib;C:\Users\KępkaStanisław\source\repos\QuakeDB\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.7\lib\native\v140\windesktop\msvcstl\static\rt-dyn\x64\Debug\gtestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\binaryConverter.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\tlv.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\column.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\table.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\fileOperationManager.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\dataBase.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\record.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\typeManager.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.7\lib\native\v140\windesktop\msvcstl\static\rt-dyn\x64\Debug\gtest_maind.lib;C:\Users\KępkaStanisław\source\repos\QuakeDB\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.7\lib\native\v140\windesktop\msvcstl\static\rt-dyn\x64\Debug\gtestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

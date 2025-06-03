@@ -24,16 +24,20 @@
     <ClCompile Include="dataBase.cpp" />
     <ClCompile Include="fileOperationManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="record.cpp" />
     <ClCompile Include="table.cpp" />
     <ClCompile Include="tlv.cpp" />
+    <ClCompile Include="typeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="binaryConverter.h" />
     <ClInclude Include="column.h" />
     <ClInclude Include="dataBase.h" />
     <ClInclude Include="fileOperationManager.h" />
+    <ClInclude Include="record.h" />
     <ClInclude Include="table.h" />
     <ClInclude Include="tlv.h" />
+    <ClInclude Include="typeManager.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -121,6 +125,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -34,3 +34,65 @@ void Table::clearAll() {
     }
     columns.clear();
 }
+std::vector<std::string> Table::getColumnName() {
+    std::vector<std::string>vec;
+    for (int i = 0; i < columns.size(); i++) {
+        vec.push_back(columns[i]->getColumnName());
+    }
+    return vec;
+}
+std::vector<uint8_t>Table::getColumnDefinition() {
+    std::vector<uint8_t> result;
+    for (const auto& column : columns) {
+        std::vector<uint8_t> columnBytes = column->MarshalColumn();
+        result.insert(result.end(), columnBytes.begin(), columnBytes.end());
+    }
+    return result;
+}
+
+void Table::LoadColumnsDefinition(std::vector<uint8_t> allBinary) {
+    size_t offset = 0;
+    int32_t size = 0;
+    int32_t type = 0;
+
+    while (offset + 4 <= allBinary.size()) {
+        std::vector<uint8_t> typeBinary(allBinary.begin() + offset, allBinary.begin() + offset + 4);
+        std::vector<uint8_t> sizeBinary(allBinary.begin() + offset + 4, allBinary.begin() + offset + 8);
+        UnmarshalInt32_t(&type, &typeBinary);
+        UnmarshalInt32_t(&size, &sizeBinary);
+        if (type == columnTypeId) {
+            Column* column = new Column("", 0, false);
+            column->loadAllBytesToDecode(std::vector<uint8_t>(allBinary.begin() + offset, allBinary.begin() + offset + 8 + size + 24));
+            std::cout << "---------todecode-------" << std::endl;
+            showBytes(std::vector<uint8_t>(allBinary.begin() + offset, allBinary.begin() + offset + 8 + size + 24));
+            std::cout << "---------todecode-------" << std::endl;
+            column->decodeColumn();
+            columns.push_back(column);
+            offset += 8 + size + 24;
+        }
+    }
+}
+std::string Table::getTableName() {
+	return tableName;
+}
+std::vector<std::vector<int32_t>> Table::getTypeAndAllowNUll() {
+    std::vector<std::vector<int32_t>>allvec;
+    for (int i = 0; i < columns.size(); i++) {
+		if (columns[i]->isAllowNull()) {
+			allvec.push_back({ columns[i]->getColumnType(), 1 });
+		}
+		else {
+			allvec.push_back({ columns[i]->getColumnType(), 0 });
+		}
+    }
+	return allvec;
+}
+void Table::addRecord(std::vector< allVars>record) {
+    Record* newRecord = new Record(record);
+    if (newRecord->isDataTypeCorrect(record, columns)) {
+        records.push_back(newRecord);
+    }
+    else {
+        delete newRecord;
+    }
+}
