@@ -111,6 +111,7 @@
     </ClCompile>
     <ClCompile Include="testColumn.cpp" />
     <ClCompile Include="testDataBase.cpp" />
+    <ClCompile Include="testRecord.cpp" />
     <ClCompile Include="testTable.cpp" />
     <ClCompile Include="testTlv.cpp" />
   </ItemGroup>

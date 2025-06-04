@@ -50,6 +50,15 @@ std::vector<uint8_t>Table::getColumnDefinition() {
     return result;
 }
 
+std::vector<uint8_t> Table::getRecordDefinition() {
+	std::vector<uint8_t> result;
+	for (const auto& record : records) {
+		std::vector<uint8_t> recordBytes = record->MarshalRecord();
+		result.insert(result.end(), recordBytes.begin(), recordBytes.end());
+	}
+	return result;
+}
+
 void Table::LoadColumnsDefinition(std::vector<uint8_t> allBinary) {
     size_t offset = 0;
     int32_t size = 0;
@@ -70,11 +79,43 @@ void Table::LoadColumnsDefinition(std::vector<uint8_t> allBinary) {
             columns.push_back(column);
             offset += 8 + size + 24;
         }
+        else {
+			lastColumnOffset = offset;
+            std::cout << "size : " << columns.size() << std::endl;
+            break;
+        }
     }
 }
+
+
+void Table::LoadRecordDefinition(std::vector<uint8_t>allBinary) {
+    size_t offset = lastColumnOffset;
+    int32_t size = 0;
+    int32_t type = 0;
+    while (offset + 4 <= allBinary.size()) {
+		std::vector<uint8_t> typeBinary(allBinary.begin() + offset, allBinary.begin() + offset + 4);
+        std::vector<uint8_t> sizeBinary(allBinary.begin() + offset + 4, allBinary.begin() + offset + 8);
+        UnmarshalInt32_t(&size, &sizeBinary);
+		UnmarshalInt32_t(&type, &typeBinary);
+        if(type == recordTypeId) {
+            Record record({}, columns);
+            record.loadAllConnectedBytes(std::vector<uint8_t>(allBinary.begin() + offset, allBinary.begin() + offset + size));
+            record.decode();
+            records.push_back(new Record(record));
+            offset += size;
+        }
+        else {
+            break;
+        }
+       
+    }
+}
+
+
 std::string Table::getTableName() {
 	return tableName;
 }
+
 std::vector<std::vector<int32_t>> Table::getTypeAndAllowNUll() {
     std::vector<std::vector<int32_t>>allvec;
     for (int i = 0; i < columns.size(); i++) {
@@ -88,7 +129,7 @@ std::vector<std::vector<int32_t>> Table::getTypeAndAllowNUll() {
 	return allvec;
 }
 void Table::addRecord(std::vector< allVars>record) {
-    Record* newRecord = new Record(record);
+    Record* newRecord = new Record(record, columns);
     if (newRecord->isDataTypeCorrect(record, columns)) {
         records.push_back(newRecord);
     }
@@ -96,3 +137,4 @@ void Table::addRecord(std::vector< allVars>record) {
         delete newRecord;
     }
 }
+

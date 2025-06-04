@@ -20,6 +20,8 @@ private:
     int64_t* int64_tValue = nullptr;
     std::string* stringValue = nullptr;
 
+    int32_t* tlvSize = nullptr;
+
     std::vector<uint8_t>* allConnectedBytes = nullptr;
 public:
     Tlv(int32_t value);
@@ -30,6 +32,15 @@ public:
     const int32_t* getInt32Value() const { return int32_tValue; }
     const int64_t* getInt64Value() const { return int64_tValue; }
     const std::string* getStringValue() const { return stringValue; }
+    int32_t getTlvSize() {
+        if (tlvSize != nullptr) {
+            return *tlvSize;
+        }
+        else {
+			std::cerr << "Error : getting size before decode or set value" << std::endl;
+            return -1;
+        }
+    }
     void clearAll();
     void setAllInt32_t(int32_t value);
     void setAllInt64_t(int64_t value);

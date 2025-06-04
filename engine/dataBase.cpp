@@ -45,7 +45,9 @@ void Database::commit() {
 		createBinFile(path, table->getTableName());
         std::vector<uint8_t> vec;
         std::vector<uint8_t> columnDefinition = table->getColumnDefinition();
+		std::vector<uint8_t> recordDefinition = table->getRecordDefinition();
         vec.insert(vec.end(), columnDefinition.begin(), columnDefinition.end());
+		vec.insert(vec.end(), recordDefinition.begin(), recordDefinition.end());
         std::string tableName = table->getTableName();
         addToFileBytes(path + "/" + tableName + ".bin", vec);
     }
@@ -62,6 +64,7 @@ void Database::loadDataBase() {
 				Table* table = new Table(fileName.substr(0, fileName.find_last_of('.')), folder);
 				std::vector<uint8_t> fileBytes = readFileBytes(entry.path().string());
                 table->LoadColumnsDefinition(fileBytes);
+                table->LoadRecordDefinition(fileBytes);
                 tables.push_back(table);
             }
         }
@@ -84,4 +87,11 @@ std::vector<std::vector<std::vector<int32_t>>> Database::getTypeAndAllowNUllTabl
 		typeAndAllowNullTables.push_back(tables[i]->getTypeAndAllowNUll());
 	}
 	return typeAndAllowNullTables;
+}
+void Database::addRecord(std::string tableName, std::vector<allVars> record) {
+    for (int i = 0; i < tables.size(); i++) {
+        if (tables[i]->getTableName() == tableName) {
+            tables[i]->addRecord(record);
+        }
+    }
 }

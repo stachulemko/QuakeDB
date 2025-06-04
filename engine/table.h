@@ -16,7 +16,7 @@ private:
     std::vector<Column*> columns;
 	std::vector<Record*> records;
     std::string path = "";
-    
+    int32_t lastColumnOffset = 0;
 
 public:
     Table(std::string name, std::string path);
@@ -28,9 +28,16 @@ public:
     void addRecord(std::vector< allVars>record);
     void addColumn(std::string columnName, int type, bool allowNull);
     void showTable();
+	void showRecords() {
+		for (const auto& record : records) {
+			record->showRecord();
+		}
+	}
     void clearAll();
     std::vector<uint8_t>getColumnDefinition();
+    std::vector<uint8_t> getRecordDefinition();
     void LoadColumnsDefinition(std::vector<uint8_t> allBinary);
+    void LoadRecordDefinition(std::vector<uint8_t>allBinary);
 };
 
 #endif 

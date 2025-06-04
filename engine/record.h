@@ -10,23 +10,34 @@
 class Record {
 private:
 	int32_t recordId=5;
+	int32_t* recordSize = nullptr;
 	std::vector<uint8_t>* allConnectedBytes = nullptr;
-	std::vector<allVars> recordData;
 	std::vector<Tlv*> recordDataTlv;
 public:
-	Record(std::vector<allVars> recordData);
+	Record(std::vector<allVars> recordData, std::vector<Column*> vec);
 	bool isDataTypeCorrect(std::vector<allVars> recordData,std::vector<Column*> vec);
-	std::vector<uint8_t> MarshalRecord() {
-		std::vector<uint8_t> result;
-		for (int i = 0; i < recordData.size(); i++) {
-			//Tlv* tlv = new Tlv(recordData[i]);
-			//std::vector<uint8_t> tlvBytes = tlv->marshalTlv();
-			//result.insert(result.end(), tlvBytes.begin(), tlvBytes.end());
-			//recordDataTlv.push_back(tlv);
+	std::vector<uint8_t> MarshalRecord();
+	void showRecord() {
+		//std::cout << "Record Size: " << *recordSize << std::endl;
+		for (const auto& tlv : recordDataTlv) {
+			tlv->showTlv();
 		}
-		return result;
 	}
-
+	void clearAll() {
+		delete recordSize;
+		for (auto& tlv : recordDataTlv) {
+			delete tlv;
+		}
+		recordDataTlv.clear();
+		delete allConnectedBytes;
+		allConnectedBytes = nullptr;
+		recordSize = nullptr;
+	}
+	void loadAllConnectedBytes(std::vector<uint8_t> bytes) {
+		clearAll();
+		allConnectedBytes = new std::vector<uint8_t>(bytes);
+	}
+	void decode();
 
 
 

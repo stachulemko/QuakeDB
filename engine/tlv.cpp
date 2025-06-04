@@ -5,6 +5,7 @@ Tlv::Tlv(int32_t value) {
     type = new int32_t(int32_tId);
     length = new int32_t(4);
     int32_tValue = new int32_t(value);
+    tlvSize = new int32_t(12);
     int64_tValue = nullptr;
     stringValue = nullptr;
     allConnectedBytes = nullptr;
@@ -14,8 +15,9 @@ Tlv::Tlv(int64_t value) {
     clearAll();
     type = new int32_t(int64_tId);
     length = new int32_t(8);
-    int32_tValue = nullptr;
+    tlvSize = new int32_t(16);
     int64_tValue = new int64_t(value);
+    int32_tValue = nullptr;
     stringValue = nullptr;
     allConnectedBytes = nullptr;
 }
@@ -24,9 +26,10 @@ Tlv::Tlv(std::string value) {
     clearAll();
     type = new int32_t(stringId);
     length = new int32_t(static_cast<int32_t>(value.size()));
+    tlvSize = new int32_t(8+ static_cast<int32_t>(value.size()));
+    stringValue = new std::string(value);
     int32_tValue = nullptr;
     int64_tValue = nullptr;
-    stringValue = new std::string(value);
     allConnectedBytes = nullptr;
 }
 
@@ -46,12 +49,14 @@ void Tlv::clearAll() {
     delete int64_tValue;
     delete stringValue;
     delete allConnectedBytes;
+    delete tlvSize;
     type = nullptr;
     length = nullptr;
     int32_tValue = nullptr;
     int64_tValue = nullptr;
     stringValue = nullptr;
     allConnectedBytes = nullptr;
+    tlvSize = nullptr;
 }
 
 void Tlv::setAllInt32_t(int32_t value) {
@@ -59,6 +64,7 @@ void Tlv::setAllInt32_t(int32_t value) {
     type = new int32_t(int32_tId);
     length = new int32_t(4);
     int32_tValue = new int32_t(value);
+    tlvSize = new int32_t(12);
     int64_tValue = nullptr;
     stringValue = nullptr;
     allConnectedBytes = nullptr;
@@ -68,8 +74,9 @@ void Tlv::setAllInt64_t(int64_t value) {
     clearAll();
     type = new int32_t(int64_tId);
     length = new int32_t(8);
-    int32_tValue = nullptr;
+    tlvSize = new int32_t(8+ *length);
     int64_tValue = new int64_t(value);
+    int32_tValue = nullptr;
     stringValue = nullptr;
     allConnectedBytes = nullptr;
 }
@@ -78,9 +85,10 @@ void Tlv::setAllString(std::string value) {
     clearAll();
     type = new int32_t(stringId);
     length = new int32_t(static_cast<int32_t>(value.size()));
+    stringValue = new std::string(value);
+    tlvSize = new int32_t(8 + *length);
     int32_tValue = nullptr;
     int64_tValue = nullptr;
-    stringValue = new std::string(value);
     allConnectedBytes = nullptr;
 }
 
@@ -122,6 +130,7 @@ void Tlv::decode() {
     std::vector<uint8_t> lengthBytes(allConnectedBytes->begin() + 4, allConnectedBytes->begin() + 8);
     length = new int32_t();
     UnmarshalInt32_t(length, &lengthBytes);
+    tlvSize = new int32_t(8 + *length);
 
     if (*type == int32_tId && allConnectedBytes->size() >= 12) {
         std::vector<uint8_t> valueBytes(allConnectedBytes->begin() + 8, allConnectedBytes->begin() + 12);
