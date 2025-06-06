@@ -2,14 +2,25 @@
 #include <filesystem>  
 
 Database::Database() {
-    //path = "dataBaseMemoryManagment";
-    //std::string tmpPath = executionFilePath() + "/" + path;
-	//std::cout << "tmpPath: " << tmpPath << std::endl;
     createFolder(path);
 }
 
 Database::~Database() {
     clearAll();
+}
+
+void Database::commit() {
+    for (auto& table : tables) {
+        deleteFile(path + "/" + table->getTableName() + ".bin");
+        createBinFile(path, table->getTableName());
+        std::vector<uint8_t> vec;
+        std::vector<uint8_t> columnDefinition = table->getColumnDefinition();
+        std::vector<uint8_t> recordDefinition = table->getRecordDefinition();
+        vec.insert(vec.end(), columnDefinition.begin(), columnDefinition.end());
+        vec.insert(vec.end(), recordDefinition.begin(), recordDefinition.end());
+        std::string tableName = table->getTableName();
+        addToFileBytes(path + "/" + tableName + ".bin", vec);
+    }
 }
 
 void Database::addTable(std::string tableName) {
@@ -25,11 +36,24 @@ void Database::addColumn(std::string tableName, std::string columnName, int data
     }
 }
 
+void Database::addRecord(std::string tableName, std::vector<allVars> record) {
+    for (int i = 0; i < tables.size(); i++) {
+        if (tables[i]->getTableName() == tableName) {
+            tables[i]->addRecord(record);
+        }
+    }
+}
+
 void Database::clearAll() {
     for (auto table : tables) {
         table->clearAll();
         delete table;
     }
+    tables.clear();
+}
+
+int Database::getTableSize() {
+    return tables.size();
 }
 
 void Database::showFile() {
@@ -38,31 +62,49 @@ void Database::showFile() {
     }
 }
 
-void Database::commit() {
-
-    for (auto& table : tables) {
-        deleteFile(path + "/" + table->getTableName() + ".bin");
-		createBinFile(path, table->getTableName());
-        std::vector<uint8_t> vec;
-        std::vector<uint8_t> columnDefinition = table->getColumnDefinition();
-		std::vector<uint8_t> recordDefinition = table->getRecordDefinition();
-        vec.insert(vec.end(), columnDefinition.begin(), columnDefinition.end());
-		vec.insert(vec.end(), recordDefinition.begin(), recordDefinition.end());
-        std::string tableName = table->getTableName();
-        addToFileBytes(path + "/" + tableName + ".bin", vec);
-    }
-
+void Database::select(std::string tableName, std::vector<std::string> columnNames) {
+    showSelect(tables, tableName, columnNames);
 }
+
+void Database::showRecords() {
+    for (int i = 0; i < tables.size(); i++) {
+        std::cout << "Table: " << tables[i]->getTableName() << std::endl;
+        std::vector<std::string> columnNames = tables[i]->getColumnName();
+        for (const auto& colName : columnNames) {
+            std::cout << colName << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "-------------records-------------" << std::endl;
+    for (int i = 0; i < tables.size(); i++) {
+        tables[i]->showRecords();
+    }
+}
+
+std::vector<std::vector<std::string>> Database::getTableColumnsNames() {
+    std::vector<std::vector<std::string>> tablesColumnNames;
+    for (int i = 0; i < tables.size(); i++) {
+        tablesColumnNames.push_back(tables[i]->getColumnName());
+    }
+    return tablesColumnNames;
+}
+
+std::vector<std::vector<std::vector<int32_t>>> Database::getTypeAndAllowNUllTables() {
+    std::vector<std::vector<std::vector<int32_t>>> typeAndAllowNullTables;
+    for (int i = 0; i < tables.size(); i++) {
+        typeAndAllowNullTables.push_back(tables[i]->getTypeAndAllowNUll());
+    }
+    return typeAndAllowNullTables;
+}
+
 void Database::loadDataBase() {
     const std::string folder = path;
-	showFileBytes(folder + "/klienci.bin");
-	std::cout << "--------------------------" << std::endl;
     try {
         for (const auto& entry : fs::directory_iterator(folder)) {
-			if (!fs::is_directory(entry.status())) {
-				std::string fileName = entry.path().filename().string();
-				Table* table = new Table(fileName.substr(0, fileName.find_last_of('.')), folder);
-				std::vector<uint8_t> fileBytes = readFileBytes(entry.path().string());
+            if (!fs::is_directory(entry.status())) {
+                std::string fileName = entry.path().filename().string();
+                Table* table = new Table(fileName.substr(0, fileName.find_last_of('.')), folder);
+                std::vector<uint8_t> fileBytes = readFileBytes(entry.path().string());
                 table->LoadColumnsDefinition(fileBytes);
                 table->LoadRecordDefinition(fileBytes);
                 tables.push_back(table);
@@ -73,25 +115,7 @@ void Database::loadDataBase() {
         std::cerr << "Error: " << e.what() << std::endl;
     }
 }
-std::vector<std::vector<std::string>> Database::getTableColumnsNames() {
-    std::vector<std::vector<std::string>>tablesColumnNames;
-    for (int i = 0; i < tables.size(); i++) {
-        tablesColumnNames.push_back(tables[i]->getColumnName());
-    }
-    return tablesColumnNames;
-}
 
-std::vector<std::vector<std::vector<int32_t>>> Database::getTypeAndAllowNUllTables() {
-	std::vector<std::vector<std::vector<int32_t>>> typeAndAllowNullTables;
-	for (int i = 0; i < tables.size(); i++) {
-		typeAndAllowNullTables.push_back(tables[i]->getTypeAndAllowNUll());
-	}
-	return typeAndAllowNullTables;
-}
-void Database::addRecord(std::string tableName, std::vector<allVars> record) {
-    for (int i = 0; i < tables.size(); i++) {
-        if (tables[i]->getTableName() == tableName) {
-            tables[i]->addRecord(record);
-        }
-    }
+std::string Database::getPath() {
+    return path;
 }

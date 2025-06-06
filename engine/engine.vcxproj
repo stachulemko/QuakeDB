@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -25,6 +25,8 @@
     <ClCompile Include="fileOperationManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="record.cpp" />
+    <ClCompile Include="select.cpp" />
+    <ClCompile Include="simpleOperations.cpp" />
     <ClCompile Include="table.cpp" />
     <ClCompile Include="tlv.cpp" />
     <ClCompile Include="typeManager.cpp" />
@@ -35,6 +37,8 @@
     <ClInclude Include="dataBase.h" />
     <ClInclude Include="fileOperationManager.h" />
     <ClInclude Include="record.h" />
+    <ClInclude Include="select.h" />
+    <ClInclude Include="simpleOperations.h" />
     <ClInclude Include="table.h" />
     <ClInclude Include="tlv.h" />
     <ClInclude Include="typeManager.h" />

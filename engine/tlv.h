@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <vector>
 #include "binaryConverter.h"
+#include "typeManager.h"
 
 class Tlv {
 private:
@@ -41,6 +42,21 @@ public:
             return -1;
         }
     }
+	allVars getValue() {
+		if (int32_tValue != nullptr) {
+			return *int32_tValue;
+		}
+		else if (int64_tValue != nullptr) {
+			return *int64_tValue;
+		}
+		else if (stringValue != nullptr) {
+			return *stringValue;
+		}
+		else {
+			std::cerr << "Error: No value set in Tlv" << std::endl;
+			return {};
+		}
+	}
     void clearAll();
     void setAllInt32_t(int32_t value);
     void setAllInt64_t(int64_t value);

@@ -12,15 +12,17 @@ int32_t getTypeId(const allVars& value) {
     }
     return -1;
 }
-Tlv* convertVarToTlv(const allVars& var) {
-    if (std::holds_alternative<int32_t>(var)) {
-        return new Tlv(std::get<int32_t>(var));
+void showVariantVariable(allVars vec) {
+    if (std::holds_alternative<int32_t>(vec)) {
+        std::cout << std::get<int32_t>(vec);
     }
-    else if (std::holds_alternative<int64_t>(var)) {
-        return new Tlv(std::get<int64_t>(var));
+    else if (std::holds_alternative<int64_t>(vec)) {
+        std::cout << std::get<int64_t>(vec);
     }
-    else if (std::holds_alternative<std::string>(var)) {
-        return new Tlv(std::get<std::string>(var));
+    else if (std::holds_alternative<std::string>(vec)) {
+        std::cout << std::get<std::string>(vec);
     }
-    return nullptr;
+    else {
+        std::cout << "NULL";
+    }
 }

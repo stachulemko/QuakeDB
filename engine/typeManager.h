@@ -3,7 +3,6 @@
 #include <iostream>
 #include <variant>
 #include <vector>
-#include "tlv.h"
 
 const int32_t int32_tId = 1;
 const int32_t int64_tId = 2;
@@ -14,6 +13,6 @@ const int32_t recordTypeId = 5;
 using allVars = std::variant<int32_t, int64_t, std::string>;
 
 int32_t getTypeId(const allVars& value);
-Tlv* convertVarToTlv(const allVars& var);
+void showVariantVariable(allVars vec);
 
 #endif

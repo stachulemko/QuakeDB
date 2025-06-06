@@ -2,7 +2,6 @@
 #include "dataBase.h"
 
 
-
 TEST(DataBaseTests, CreateAndDeleteSingleTable) {
     Database db;
     std::string tableName = "testTable";

@@ -25,6 +25,9 @@ public:
     std::vector<std::string> getColumnName();
     std::string getTableName();
     std::vector<std::vector<int32_t>> getTypeAndAllowNUll();
+	std::vector<Record*> getRecords() {
+		return records;
+	}
     void addRecord(std::vector< allVars>record);
     void addColumn(std::string columnName, int type, bool allowNull);
     void showTable();
