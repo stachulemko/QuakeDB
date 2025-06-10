@@ -6,6 +6,7 @@
 #include "column.h"
 #include "typeManager.h"
 #include "tlv.h"
+#include <cassert>
 
 
 class Record {
@@ -15,6 +16,7 @@ private:
     std::vector<uint8_t>* allConnectedBytes = nullptr;
     std::vector<Tlv*> recordDataTlv;
 public:
+    Record() {};
     Record(std::vector<allVars> recordData, std::vector<Column*> vec);
     bool isDataTypeCorrect(std::vector<allVars> recordData, std::vector<Column*> vec);
     std::vector<uint8_t> MarshalRecord();

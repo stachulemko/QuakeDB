@@ -8,11 +8,17 @@
 #include <cstdint>
 #include "fileOperationManager.h"
 #include "select.h"
+#include "where.h"
 
 class Database {
 private:
     std::vector<Table*> tables;
     std::string path = "dataBaseMemoryManagment";
+
+    //---dataBase fuctions -----
+    std::vector<std::vector<allVars>> sqlQueryBytes;
+    std::vector<std::vector<allVars>> AllTableBytes;
+	bool selectAcomplished = false;
 public:
     Database();
 
@@ -32,7 +38,24 @@ public:
 
     void showFile();
 
-    void select(std::string tableName, std::vector<std::string> columnNames);
+    Database &select(std::string tableName, std::vector<std::string> columnNames);
+
+    Database &where(std::string columnName, std::string mathOperator, allVars ifValue);
+
+    Database& showSqQuery();
+
+    void clearQueryVariables() {
+        sqlQueryBytes.clear();
+		selectAcomplished = false;
+    }
+
+    std::vector<std::vector<allVars>> getSqlQueryBytes() {
+		std::cout << "sqlQueryBytes size: " << sqlQueryBytes.size() << std::endl;
+        std::vector<std::vector<allVars>>tmpSqlQueryBytes = sqlQueryBytes;
+		clearQueryVariables();
+        return tmpSqlQueryBytes;
+
+    }
 
     void showRecords();
 

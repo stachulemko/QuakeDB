@@ -72,16 +72,16 @@ void Table::LoadColumnsDefinition(std::vector<uint8_t> allBinary) {
         if (type == columnTypeId) {
             Column* column = new Column("", 0, false);
             column->loadAllBytesToDecode(std::vector<uint8_t>(allBinary.begin() + offset, allBinary.begin() + offset + 8 + size + 24));
-            std::cout << "---------todecode-------" << std::endl;
-            showBytes(std::vector<uint8_t>(allBinary.begin() + offset, allBinary.begin() + offset + 8 + size + 24));
-            std::cout << "---------todecode-------" << std::endl;
+            //std::cout << "---------todecode-------" << std::endl;
+            //showBytes(std::vector<uint8_t>(allBinary.begin() + offset, allBinary.begin() + offset + 8 + size + 24));
+            //std::cout << "---------todecode-------" << std::endl;
             column->decodeColumn();
             columns.push_back(column);
             offset += 8 + size + 24;
         }
         else {
 			lastColumnOffset = offset;
-            std::cout << "size : " << columns.size() << std::endl;
+            //std::cout << "size : " << columns.size() << std::endl;
             break;
         }
     }
@@ -98,7 +98,7 @@ void Table::LoadRecordDefinition(std::vector<uint8_t>allBinary) {
         UnmarshalInt32_t(&size, &sizeBinary);
 		UnmarshalInt32_t(&type, &typeBinary);
         if(type == recordTypeId) {
-            Record record({}, columns);
+            Record record;
             record.loadAllConnectedBytes(std::vector<uint8_t>(allBinary.begin() + offset, allBinary.begin() + offset + size));
             record.decode();
             records.push_back(new Record(record));

@@ -14,5 +14,6 @@ using allVars = std::variant<int32_t, int64_t, std::string>;
 
 int32_t getTypeId(const allVars& value);
 void showVariantVariable(allVars vec);
+void showVariantVectorOfVector(std::vector<std::vector<allVars>> vec);
 
 #endif

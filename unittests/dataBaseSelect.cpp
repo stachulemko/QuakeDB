@@ -14,6 +14,8 @@ TEST(dataBaseSelect, SelectFromSingleTable) {
     // Test select
     Database selectDb;
     selectDb.loadDataBase();
+
+
     std::vector<std::vector<allVars>> vec = selectFunc(selectDb.getTables(), tableName, { "id", "name" });
     if (vec.empty()) {
         FAIL() << "Select returned empty result";

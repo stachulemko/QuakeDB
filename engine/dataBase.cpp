@@ -62,8 +62,61 @@ void Database::showFile() {
     }
 }
 
-void Database::select(std::string tableName, std::vector<std::string> columnNames) {
-    showSelect(tables, tableName, columnNames);
+Database &Database::select(std::string tableName, std::vector<std::string> columnNames) {
+    //showSelect(tables, tableName, columnNames);
+	selectAcomplished = true;
+    sqlQueryBytes.clear();
+    AllTableBytes.clear();
+    for (int i = 0; i < tables.size(); i++) {
+        if (tables[i]->getTableName() == tableName) {
+            AllTableBytes = tables[i]->getTableDefinition();
+            break;
+        }
+    }
+    sqlQueryBytes = selectFunc(tables, tableName, columnNames);
+	return *this;
+}
+
+Database &Database::where(std::string columnName, std::string mathOperator, allVars ifValue) {
+	if (selectAcomplished) {
+        sqlQueryBytes = whereFunc(AllTableBytes,sqlQueryBytes, columnName, mathOperator, ifValue);
+	}
+	else 
+    {
+		std::cerr << "Select must be called before where." << std::endl;
+	}
+	return *this;
+}
+
+Database& Database::showSqQuery() {
+    if (selectAcomplished) {
+        std::vector<std::vector<allVars>> selectedData = sqlQueryBytes;
+        if (selectedData.empty()) {
+            std::cerr << "No data found for the specified table and columns." << std::endl;
+            return *this;
+        }
+        for (int i = 0; i < selectedData[0].size(); i++) {
+            std::cout << "|  ";
+            showVariantVariable(selectedData[0][i]);
+            std::cout << "  |";
+
+        }
+        std::cout << std::endl;
+        for (size_t i = 1; i < selectedData.size(); ++i) {
+            for (const auto& value : selectedData[i]) {
+                std::cout << "|  ";
+                //std::cout << "val : " << value << std::endl;
+                showVariantVariable(value);
+                std::cout << "  |";
+            }
+            std::cout << std::endl;
+		}
+	}
+    else {
+        std::cerr << "Select must be called before showing query." << std::endl;
+    }
+    clearQueryVariables();
+    return *this;
 }
 
 void Database::showRecords() {

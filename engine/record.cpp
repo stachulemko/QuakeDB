@@ -17,15 +17,20 @@ Record::Record(std::vector<allVars> recordData, std::vector<Column*> vec) {
 
 bool Record::isDataTypeCorrect(std::vector<allVars> recordData, std::vector<Column*> vec) {
     if (vec.size() != recordData.size()) {
-        std::cerr << "Error(insert): Number of columns does not match number of data types in record." << std::endl;
+        assert(false && "Error(insert): Number of columns does not match number of data types in record.");   //might be error
+        //std::cerr << "Error(insert): Number of columns does not match number of data types in record." << std::endl;
         return false;
     }
     else {
         for (int i = 0; i < recordData.size(); i++) {
             if (getTypeId(recordData[i]) != vec[i]->getColumnType()) {
-                std::cerr << "Error(insert): Data type mismatch for column '" << vec[i]->getColumnName() << "'. Expected type: " << vec[i]->getColumnType() << ", but got: " << getTypeId(recordData[i]) << std::endl;
+                assert(false && "Error(insert): Data type mismatch for column '");
+                //std::cerr <<  << vec[i]->getColumnName() << "'. Expected type: " << vec[i]->getColumnType() << ", but got: " << getTypeId(recordData[i]) << std::endl;
                 return false;
             }
+			else if (getTypeId(recordData[i]) == stringId and std::get<std::string>(recordData[i]).empty()) {
+                assert(false && "record data string empty");   //might be error
+			}
         }
     }
     return true;
@@ -104,7 +109,8 @@ void Record::decode() {
                         recordDataTlv.push_back(tlv);
                     }
                     else {
-                        std::cerr << "Error : Invalid dataTlv record size " << std::endl;
+                        //std::cerr << "Error : Invalid dataTlv record size " << std::endl;
+                        assert(false && "Invalid dataTlv record size");   //might be error
                         delete typeRecordTlv;
                         delete lengthRecordTlv;
                         delete type;

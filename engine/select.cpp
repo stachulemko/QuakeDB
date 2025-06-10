@@ -1,6 +1,5 @@
 #include "select.h"
 
-
 std::vector<std::vector<allVars>> selectFunc(std::vector<Table*> tables, std::string tableName, std::vector<std::string> columnNames) {
     std::vector<std::vector<allVars>> selectData;
     
@@ -11,7 +10,6 @@ std::vector<std::vector<allVars>> selectFunc(std::vector<Table*> tables, std::st
             selectData.push_back({});
             
             if (columnNames[0] != "*") {
-                // Iterujemy przez ¿¹dane kolumny, zachowuj¹c ich kolejnoœæ
                 for (const auto& colName : columnNames) {
                     int foundIndex = -1;
                     for (int j = 0; j < columns.size(); j++) {
@@ -30,20 +28,17 @@ std::vector<std::vector<allVars>> selectFunc(std::vector<Table*> tables, std::st
                     columnIndexes.push_back(foundIndex);
                 }
                 
-                // Dodajemy rekordy
                 std::vector<Record*> selectedColumns = tables[i]->getRecords();
                 for (int k = 0; k < selectedColumns.size(); k++) {
                     selectData.push_back({});
                     std::vector<Tlv*> tlvvec = selectedColumns[k]->getRecordDataTlv();
                     
-                    // U¿yj indeksów w odpowiedniej kolejnoœci
                     for (int j = 0; j < columnIndexes.size(); j++) {
                         selectData[k + 1].push_back(tlvvec[columnIndexes[j]]->getValue());
                     }
                 }
             }
             else {
-                // Obs³uga przypadku "*" - wszystkie kolumny w kolejnoœci definicji tabeli
                 for (int j = 0; j < columns.size(); j++) {
                     selectData[0].push_back(columns[j]);
                     columnIndexes.push_back(j);

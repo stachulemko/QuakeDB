@@ -26,3 +26,15 @@ void showVariantVariable(allVars vec) {
         std::cout << "NULL";
     }
 }
+void showVariantVectorOfVector(std::vector<std::vector<allVars>> vec) {
+    for (int i = 0; i < vec.size(); i++) {
+		std::cout << "Row " << i + 1 << ": ";
+		for (int j = 0; j < vec[i].size(); j++) {
+			showVariantVariable(vec[i][j]);
+			if (j < vec[i].size() - 1) {
+				std::cout << ", ";
+			}
+		}
+		std::cout << std::endl;
+    }
+}

@@ -10,7 +10,7 @@ void createFolder(std::string path) {
             }
         }
         else {
-            std::cerr << "Error: Folder '" << path << "' already exists!" << std::endl;
+            std::cerr << "WARNING: Folder '" << path << "' already exists!" << std::endl;
         }
     }
     catch (const std::exception& e) {

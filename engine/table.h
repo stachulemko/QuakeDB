@@ -28,6 +28,21 @@ public:
 	std::vector<Record*> getRecords() {
 		return records;
 	}
+    std::vector<std::vector<allVars>>getTableDefinition() {
+        std::vector<std::vector<allVars>>tableData;
+        tableData.push_back({});
+        for (int i = 0; i < columns.size(); i++) {
+            tableData[0].push_back(columns[i]->getColumnName());
+        }
+        for (int k = 0; k < records.size(); k++) {
+            tableData.push_back({});
+            std::vector<Tlv*> tlvvec = records[k]->getRecordDataTlv();
+            for (int j = 0; j < tlvvec.size(); j++) {
+                tableData[k + 1].push_back(tlvvec[j]->getValue());
+            }
+        }
+        return tableData;
+    }
     void addRecord(std::vector< allVars>record);
     void addColumn(std::string columnName, int type, bool allowNull);
     void showTable();

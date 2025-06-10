@@ -41,8 +41,10 @@ TEST(RecordTests, ConstructWithValidData) {
     cleanupColumns(columns);
 }
 
-// Test record validation with mismatched data types
+// Test record validation with mismatched data types - u¿ywaj¹c ASSERT_DEATH
 TEST(RecordTests, ValidateWithIncorrectTypes) {
+    testing::FLAGS_gtest_death_test_style = "threadsafe"; // Ustaw tryb testu œmierci
+
     // Create columns
     std::vector<Column*> columns = createTestColumns();
 
@@ -53,17 +55,43 @@ TEST(RecordTests, ValidateWithIncorrectTypes) {
         static_cast<int64_t>(123) // int64_t instead of string
     };
 
-    // Check validation without creating record (since construction would fail)
-    Record* tempRecord = new Record({ 0, static_cast<int64_t>(0), std::string("") }, columns);
-    EXPECT_FALSE(tempRecord->isDataTypeCorrect(wrongData, columns));
-    delete tempRecord;
+    // Sprawdzamy czy funkcja isDataTypeCorrect zg³asza asercjê
+    // dla niepoprawnych danych - jeœli tak, test powinien przejœæ
+    ASSERT_DEATH({
+        Record tempRecord({ 0, static_cast<int64_t>(0), std::string("") }, columns);
+        tempRecord.isDataTypeCorrect(wrongData, columns);
+        }, ".*") << "Test ZDANY: asercja zosta³a zg³oszona dla nieprawid³owych typów danych";
 
     // Clean up
     cleanupColumns(columns);
 }
 
-// Test record validation with wrong number of columns
+// Test na asercjê przy tworzeniu rekordu z pustym stringiem
+TEST(RecordTests, EmptyStringAssertion) {
+    testing::FLAGS_gtest_death_test_style = "threadsafe";
+
+    // Create columns
+    std::vector<Column*> columns;
+    columns.push_back(new Column("StringCol", 3, false)); // string, NOT NULL
+
+    // Tworzymy rekord z pustym stringiem - powinien byæ assert
+    std::vector<allVars> dataWithEmptyString = {
+        std::string("") // Pusty string
+    };
+
+    // Sprawdzamy czy zostanie zg³oszona asercja
+    ASSERT_DEATH({
+        Record * record = new Record(dataWithEmptyString, columns);
+        }, ".*") << "Test ZDANY: asercja zosta³a zg³oszona dla pustego stringa";
+
+    // Clean up
+    cleanupColumns(columns);
+}
+
+// Test record validation with wrong number of columns - u¿ywaj¹c ASSERT_DEATH
 TEST(RecordTests, ValidateWithWrongColumnCount) {
+    testing::FLAGS_gtest_death_test_style = "threadsafe";
+
     // Create columns
     std::vector<Column*> columns = createTestColumns();
 
@@ -74,10 +102,11 @@ TEST(RecordTests, ValidateWithWrongColumnCount) {
         // Missing the string field
     };
 
-    // Create temporary record to test validation
-    Record* tempRecord = new Record({ 0, static_cast<int64_t>(0), std::string("") }, columns);
-    EXPECT_FALSE(tempRecord->isDataTypeCorrect(tooFewData, columns));
-    delete tempRecord;
+    // Sprawdzamy czy zostanie zg³oszona asercja dla niepasuj¹cej liczby kolumn
+    ASSERT_DEATH({
+        Record tempRecord({ 0, static_cast<int64_t>(0), std::string("") }, columns);
+        tempRecord.isDataTypeCorrect(tooFewData, columns);
+        }, ".*") << "Test ZDANY: asercja zosta³a zg³oszona dla nieprawid³owej liczby kolumn";
 
     // Clean up
     cleanupColumns(columns);
@@ -136,7 +165,6 @@ TEST(RecordTests, RecordWithNullValues) {
     columns.push_back(new Column("NullableInt", 1, true)); // int32_t, NULL
 
     // Create record data with a NULL value (represented as default constructed int)
-    // Note: This is a simplification - actual NULL handling would depend on implementation
     std::vector<allVars> dataWithNull = {
         42,         // Normal int32_t
         0           // "NULL" int32_t
@@ -208,31 +236,34 @@ TEST(RecordTests, MixedRecordTypes) {
     cleanupColumns(mixedColumns);
 }
 
-// Test special string values
+// Test special string values - zamieniony na test asercji
 TEST(RecordTests, SpecialStringValues) {
+    testing::FLAGS_gtest_death_test_style = "threadsafe";
+
     // Create a column for string
     std::vector<Column*> columns;
     columns.push_back(new Column("StringCol", 3, false)); // string, NOT NULL
 
-    // Create record data with special strings
+    // Empty string powinien wywo³aæ asercjê
     std::vector<allVars> specialStrings = {
         std::string(""), // Empty string
     };
 
-    // Create and validate record
-    Record* record = new Record(specialStrings, columns);
-    EXPECT_TRUE(record->isDataTypeCorrect(specialStrings, columns));
+    // Sprawdzamy czy jest asercja dla pustego stringa
+    ASSERT_DEATH({
+        Record record(specialStrings, columns);
+        }, ".*") << "Test ZDANY: asercja zosta³a zg³oszona dla pustego stringa";
 
-    // Create record with special characters
+    // Stringi ze znakami specjalnymi powinny dzia³aæ normalnie
     std::vector<allVars> specialChars = {
         std::string("!@#$%^&*()_+{}:\"|<>?[];',./")
     };
 
-    Record* record2 = new Record(specialChars, columns);
+    Record* record2 = nullptr;
+    EXPECT_NO_THROW(record2 = new Record(specialChars, columns));
     EXPECT_TRUE(record2->isDataTypeCorrect(specialChars, columns));
 
     // Clean up
-    delete record;
     delete record2;
     cleanupColumns(columns);
 }
@@ -250,6 +281,7 @@ TEST(RecordTests, LargeRecord) {
     }
 
     // Create matching record data
+    // Create matching record data
     std::vector<allVars> manyValues;
 
     for (int i = 0; i < numColumns; i++) {
@@ -261,7 +293,7 @@ TEST(RecordTests, LargeRecord) {
             manyValues.push_back(static_cast<int64_t>(i * 1000000));
             break;
         case 2: // string
-            manyValues.push_back(std::string("Value" + std::to_string(i)));
+            manyValues.push_back(std::string("Value" + std::to_string(i))); // Niepusty string
             break;
         }
     }
@@ -285,3 +317,28 @@ TEST(RecordTests, LargeRecord) {
     cleanupColumns(manyColumns);
 }
 
+// Test asercji przy dekodowaniu rekordu z nieprawid³owym rozmiarem
+TEST(RecordTests, InvalidTlvSizeAssertion) {
+    testing::FLAGS_gtest_death_test_style = "threadsafe";
+
+    // Tworzymy nieprawid³owe dane TLV (za ma³y rozmiar)
+    std::vector<uint8_t> invalidTlvData = {
+        // Typ rekordu (5)
+        0x05, 0x00, 0x00, 0x00,
+        // Rozmiar (20)
+        0x14, 0x00, 0x00, 0x00,
+        // Typ TLV (1 - int32_t)
+        0x01, 0x00, 0x00, 0x00,
+        // D³ugoœæ TLV (100 - zbyt du¿a dla pozosta³ych bajtów)
+        0x64, 0x00, 0x00, 0x00
+        // Brak danych dla tej d³ugoœci
+    };
+
+    // Sprawdzamy czy zostanie zg³oszona asercja
+    Record record;
+    record.loadAllConnectedBytes(invalidTlvData);
+
+    ASSERT_DEATH({
+        record.decode();
+        }, ".*") << "Test ZDANY: asercja zosta³a zg³oszona dla nieprawid³owego rozmiaru TLV";
+}
