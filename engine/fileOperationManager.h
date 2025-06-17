@@ -33,4 +33,6 @@ bool isFileExists(const std::string& path);
 
 std::string executionFilePath();
 
+void clearFile(std::string path);
+
 #endif 

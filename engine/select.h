@@ -7,6 +7,7 @@
 #include "typeManager.h"
 
 std::vector<std::vector<allVars>> selectFunc(std::vector<Table*> tables, std::string tableName, std::vector<std::string> columnNames);
+
 void showSelect(std::vector<Table*> tables, std::string tableName, std::vector<std::string> columnNames);
 
 #endif

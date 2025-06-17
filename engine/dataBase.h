@@ -9,13 +9,15 @@
 #include "fileOperationManager.h"
 #include "select.h"
 #include "where.h"
+#include "wal.h"
 
 class Database {
 private:
+    Wal *wal;
     std::vector<Table*> tables;
     std::string path = "dataBaseMemoryManagment";
 
-    //---dataBase fuctions -----
+    //---Query needed variables(data)-----
     std::vector<std::vector<allVars>> sqlQueryBytes;
     std::vector<std::vector<allVars>> AllTableBytes;
 	bool selectAcomplished = false;
@@ -29,6 +31,8 @@ public:
     void addTable(std::string tableName);
 
     void addColumn(std::string tableName, std::string columnName, int dataType, bool allowNull);
+
+    void showWal();
 
     void addRecord(std::string tableName, std::vector<allVars> record);
 
@@ -44,18 +48,9 @@ public:
 
     Database& showSqQuery();
 
-    void clearQueryVariables() {
-        sqlQueryBytes.clear();
-		selectAcomplished = false;
-    }
+    void clearQueryVariables();
 
-    std::vector<std::vector<allVars>> getSqlQueryBytes() {
-		std::cout << "sqlQueryBytes size: " << sqlQueryBytes.size() << std::endl;
-        std::vector<std::vector<allVars>>tmpSqlQueryBytes = sqlQueryBytes;
-		clearQueryVariables();
-        return tmpSqlQueryBytes;
-
-    }
+    std::vector<std::vector<allVars>> getSqlQueryBytes();
 
     void showRecords();
 

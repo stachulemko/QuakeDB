@@ -197,3 +197,29 @@ std::vector<uint8_t> Tlv::marshalTlv() {
     delete lengthBytes;
     return result;
 }
+
+int32_t Tlv::getTlvSize() {
+    if (tlvSize != nullptr) {
+        return *tlvSize;
+    }
+    else {
+        std::cerr << "Error : getting size before decode or set value" << std::endl;
+        return -1;
+    }
+}
+
+allVars Tlv::getValue() {
+    if (int32_tValue != nullptr) {
+        return *int32_tValue;
+    }
+    else if (int64_tValue != nullptr) {
+        return *int64_tValue;
+    }
+    else if (stringValue != nullptr) {
+        return *stringValue;
+    }
+    else {
+        std::cerr << "Error: No value set in Tlv" << std::endl;
+        return {};
+    }
+}

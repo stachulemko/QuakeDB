@@ -5,7 +5,15 @@ Column::Column(std::string name, int32_t columnType, bool allowNUll) {
     columnName = new Tlv(name);
     columnTypeTlv = new Tlv(columnType);
     allowNull = new Tlv(allowNUll ? 1 : 0);
-    columnSize = new int32_t(columnName->getLength() + columnTypeTlv->getLength() + allowNull->getLength());
+    columnSize = new int32_t(columnName->getTlvSize() + columnTypeTlv->getTlvSize() + allowNull->getTlvSize());
+    /*
+	if (name.empty()) {
+        assert(false && "record data string empty"); 
+	}
+    else {
+        
+    }
+    */
 }
 
 Column::~Column() {
@@ -17,11 +25,11 @@ void Column::SetColumn(std::string name, int32_t columnType, bool allowNUll) {
     columnName = new Tlv(name);
     columnTypeTlv = new Tlv(columnType);
     allowNull = new Tlv(allowNUll ? 1 : 0);
-    columnSize = new int32_t(columnName->getLength() + columnTypeTlv->getLength() + allowNull->getLength());
+    columnSize = new int32_t(columnName->getTlvSize() + columnTypeTlv->getTlvSize() + allowNull->getTlvSize());
 }
 
 int32_t Column::getColumnSize() {
-    int32_t sum = columnName->getLength() + columnTypeTlv->getLength() + allowNull->getLength() + 4;
+    int32_t sum = columnName->getTlvSize() + columnTypeTlv->getTlvSize() + allowNull->getTlvSize() ;
     return sum;
 }
 

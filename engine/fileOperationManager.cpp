@@ -114,3 +114,23 @@ std::string executionFilePath() {
     }
 	return path;
 }
+
+void clearFile(std::string path) {
+    try {
+        if (fs::exists(path)) {
+            std::ofstream file(path, std::ios::binary | std::ios::trunc);
+            if (!file) {
+                std::cerr << "Error: Cannot open file '" << path << "' for clearing!" << std::endl;
+                return;
+            }
+            file.close();
+            std::cerr << "File '" << path << "' cleared successfully." << std::endl;
+        }
+        else {
+            std::cerr << "Error: File '" << path << "' does not exist!" << std::endl;
+        }
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error while clearing file: " << e.what() << std::endl;
+    }
+}

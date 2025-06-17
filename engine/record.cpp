@@ -90,7 +90,7 @@ void Record::decode() {
             int32_t* size = new int32_t();
             UnmarshalInt32_t(size, &sizeBytes);
             recordSize = new int32_t(*size);
-            if (*size == allConnectedBytes->size()) {
+            if (*size== allConnectedBytes->size()) {
                 int32_t offset = 8;
                 int32_t* typeRecordTlv = new int32_t();
                 int32_t* lengthRecordTlv = new int32_t();
@@ -129,5 +129,22 @@ void Record::decode() {
             return;
         }
     }
+}
+int32_t Record::getRecordSize() {
+    if (recordSize != nullptr) {
+        return *recordSize;
+    }
+    else {
+        std::cerr << "Error: Record size is not set." << std::endl;
+        return -1;
+    }
+}
+
+std::vector<allVars> Record::getRecordData() {
+    std::vector<allVars> data;
+    for (const auto& tlv : recordDataTlv) {
+        data.push_back(tlv->getValue());
+    }
+    return data;
 }
 

@@ -17,13 +17,25 @@ private:
     std::vector<Tlv*> recordDataTlv;
 public:
     Record() {};
+
     Record(std::vector<allVars> recordData, std::vector<Column*> vec);
+
     bool isDataTypeCorrect(std::vector<allVars> recordData, std::vector<Column*> vec);
+
     std::vector<uint8_t> MarshalRecord();
+
     void showRecord();
+
     std::vector<Tlv*> getRecordDataTlv();
+
+    int32_t getRecordSize();
+
+    std::vector<allVars> getRecordData();
+
     void clearAll();
+
     void loadAllConnectedBytes(std::vector<uint8_t> bytes);
+
     void decode();
 };
 #endif

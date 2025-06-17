@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "table.h"
+#include "wal.h"
 
 // Resetuje przechwytywanie stdout aby uniknπÊ b≥Ídu "Only one stdout capturer can exist at a time"
 void ResetStdoutCapture() {
@@ -7,40 +8,45 @@ void ResetStdoutCapture() {
 }
 
 TEST(TableTests, ConstructorWithValidParameters) {
-    Table table("testTable", ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table("testTable", ".", wal);
     EXPECT_EQ(table.getTableName(), "testTable");
 }
 
 TEST(TableTests, ConstructorWithEmptyName) {
-    Table table("", ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table("", ".", wal);
     EXPECT_EQ(table.getTableName(), "");
 }
 
 TEST(TableTests, ConstructorWithLongName) {
     std::string longName(100, 'a');
-    Table table(longName, ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table(longName, ".", wal);
     EXPECT_EQ(table.getTableName(), longName);
 }
 
 TEST(TableTests, ConstructorWithSpecialChars) {
     std::string specialName = "test_special";
-    Table table(specialName, ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table(specialName, ".", wal);
     EXPECT_EQ(table.getTableName(), specialName);
 }
 
 TEST(TableTests, GetTableNameTest) {
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
     {
-        Table table("normalName", ".");
+        Table table("normalName", ".", wal);
         EXPECT_EQ(table.getTableName(), "normalName");
     }
 
     {
-        Table table("", ".");
+        Table table("", ".", wal);
         EXPECT_EQ(table.getTableName(), "");
     }
 
     {
-        Table table("name with spaces", ".");
+        Table table("name with spaces", ".", wal);
         EXPECT_EQ(table.getTableName(), "name with spaces");
     }
 }
@@ -48,8 +54,8 @@ TEST(TableTests, GetTableNameTest) {
 TEST(TableTests, AddColumnBasicTypes) {
     // Najpierw resetujemy stdout
     ResetStdoutCapture();
-
-    Table table("columnTypesTest", ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table("columnTypesTest", ".", wal);
 
     EXPECT_NO_THROW(table.addColumn("intColumn", 1, false));
     EXPECT_NO_THROW(table.addColumn("stringColumn", 3, false));
@@ -66,8 +72,8 @@ TEST(TableTests, AddColumnBasicTypes) {
 
 TEST(TableTests, AddColumnWithEmptyName) {
     ResetStdoutCapture();
-
-    Table table("emptyColumnTest", ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table("emptyColumnTest", ".", wal);
     EXPECT_NO_THROW(table.addColumn("", 1, false));
 
     testing::internal::CaptureStdout();
@@ -79,8 +85,8 @@ TEST(TableTests, AddColumnWithEmptyName) {
 
 TEST(TableTests, AddColumnWithLongName) {
     ResetStdoutCapture();
-
-    Table table("longColumnTest", ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table("longColumnTest", ".", wal);
     std::string longColumnName(100, 'b');
     EXPECT_NO_THROW(table.addColumn(longColumnName, 1, false));
 
@@ -93,8 +99,8 @@ TEST(TableTests, AddColumnWithLongName) {
 
 TEST(TableTests, MultipleColumnsOrdering) {
     ResetStdoutCapture();
-
-    Table table("orderingTest", ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table("orderingTest", ".", wal);
 
     table.addColumn("first", 1, false);
     table.addColumn("second", 2, false);
@@ -118,8 +124,8 @@ TEST(TableTests, MultipleColumnsOrdering) {
 
 TEST(TableTests, AddManyColumns) {
     ResetStdoutCapture();
-
-    Table table("manyColumnsTest", ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table("manyColumnsTest", ".", wal);
 
     for (int i = 0; i < 20; i++) {
         std::string colName = "col" + std::to_string(i);
@@ -138,8 +144,8 @@ TEST(TableTests, AddManyColumns) {
 
 TEST(TableTests, ShowTableEmpty) {
     ResetStdoutCapture();
-
-    Table table("emptyTable", ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table("emptyTable", ".", wal);
 
     testing::internal::CaptureStdout();
     table.showTable();
@@ -151,8 +157,8 @@ TEST(TableTests, ShowTableEmpty) {
 
 TEST(TableTests, ShowTableWithColumns) {
     ResetStdoutCapture();
-
-    Table table("populatedTable", ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table("populatedTable", ".", wal);
 
     table.addColumn("id", 1, false);
     table.addColumn("name", 3, true);
@@ -169,13 +175,15 @@ TEST(TableTests, ShowTableWithColumns) {
 }
 
 TEST(TableTests, ClearAllEmptyTable) {
-    Table* table = new Table("emptyTable", ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table* table = new Table("emptyTable", ".", wal);
     EXPECT_NO_THROW(table->clearAll());
     EXPECT_NO_THROW(delete table);
 }
 
 TEST(TableTests, ClearAllMultipleTimes) {
-    Table* table = new Table("multiClearTable", ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table* table = new Table("multiClearTable", ".", wal);
     table->addColumn("col1", 1, false);
     EXPECT_NO_THROW(table->clearAll());
     EXPECT_NO_THROW(table->clearAll());
@@ -184,8 +192,8 @@ TEST(TableTests, ClearAllMultipleTimes) {
 
 TEST(TableTests, AddColumnsAfterClear) {
     ResetStdoutCapture();
-
-    Table table("clearAndAdd", ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table("clearAndAdd", ".", wal);
 
     table.addColumn("col1", 1, false);
     table.clearAll();
@@ -202,9 +210,9 @@ TEST(TableTests, AddColumnsAfterClear) {
 
 TEST(TableTests, SameTableName) {
     ResetStdoutCapture();
-
-    Table table1("duplicateNameTest", "./dir1");
-    Table table2("duplicateNameTest", "./dir2");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table1("duplicateNameTest", "./dir1", wal);
+    Table table2("duplicateNameTest", "./dir2", wal);
 
     EXPECT_EQ(table1.getTableName(), table2.getTableName());
 
@@ -230,8 +238,8 @@ TEST(TableTests, SameTableName) {
 
 TEST(TableTests, ColumnTypesValues) {
     ResetStdoutCapture();
-
-    Table table("typesTest", ".");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table("typesTest", ".", wal);
 
     table.addColumn("normalType", 1, false);
     table.addColumn("maxType", INT32_MAX, false);
@@ -248,12 +256,14 @@ TEST(TableTests, ColumnTypesValues) {
 
 TEST(TableTests, DifferentPaths) {
     // Wszystkie úcieøki bÍdπ podkatalogami "."
-    Table table1("pathTest1", "./subdir1");
+    Wal* wal = nullptr; // Inicjalizacja wskaünika jako nullptr
+    Table table1("pathTest1", "./subdir1", wal);
     EXPECT_EQ(table1.getTableName(), "pathTest1");
 
-    Table table2("pathTest2", "./subdir2");
+    Table table2("pathTest2", "./subdir2", wal);
     EXPECT_EQ(table2.getTableName(), "pathTest2");
 
-    Table table3("pathTest3", ".");
+    Table table3("pathTest3", ".", wal);
     EXPECT_EQ(table3.getTableName(), "pathTest3");
 }
+

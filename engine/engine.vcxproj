@@ -30,6 +30,7 @@
     <ClCompile Include="table.cpp" />
     <ClCompile Include="tlv.cpp" />
     <ClCompile Include="typeManager.cpp" />
+    <ClCompile Include="wal.cpp" />
     <ClCompile Include="where.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -43,6 +44,7 @@
     <ClInclude Include="table.h" />
     <ClInclude Include="tlv.h" />
     <ClInclude Include="typeManager.h" />
+    <ClInclude Include="wal.h" />
     <ClInclude Include="where.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

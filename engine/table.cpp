@@ -1,5 +1,6 @@
 #include "table.h"
-Table::Table(std::string name, std::string path) {
+Table::Table(std::string name, std::string path, Wal* wal) {
+    this->wal = wal;
     tableName = name;
     this->path = path;
 }
@@ -10,6 +11,7 @@ Table::~Table() {
 
 void Table::addColumn(std::string columnName, int type, bool allowNull) {
     Column* newColumn = new Column(columnName, type, allowNull);
+    wal->addToWall(newColumn->MarshalColumn(), addColumnTypeId, { newColumn->getColumnType(),newColumn->getColumnSize(),newColumn->getColumnName() },newColumn->getColumnSize());
     columns.push_back(newColumn);
 }
 
@@ -71,13 +73,14 @@ void Table::LoadColumnsDefinition(std::vector<uint8_t> allBinary) {
         UnmarshalInt32_t(&size, &sizeBinary);
         if (type == columnTypeId) {
             Column* column = new Column("", 0, false);
-            column->loadAllBytesToDecode(std::vector<uint8_t>(allBinary.begin() + offset, allBinary.begin() + offset + 8 + size + 24));
+            column->loadAllBytesToDecode(std::vector<uint8_t>(allBinary.begin() + offset, allBinary.begin() + offset + 8 + size));
             //std::cout << "---------todecode-------" << std::endl;
             //showBytes(std::vector<uint8_t>(allBinary.begin() + offset, allBinary.begin() + offset + 8 + size + 24));
             //std::cout << "---------todecode-------" << std::endl;
             column->decodeColumn();
             columns.push_back(column);
-            offset += 8 + size + 24;
+            //column->showColumn();
+            offset += 8 + size;
         }
         else {
 			lastColumnOffset = offset;
@@ -132,9 +135,30 @@ void Table::addRecord(std::vector< allVars>record) {
     Record* newRecord = new Record(record, columns);
     if (newRecord->isDataTypeCorrect(record, columns)) {
         records.push_back(newRecord);
+        wal->addToWall(newRecord->MarshalRecord(), insertTypeId, newRecord->getRecordData(), newRecord->getRecordSize());
     }
     else {
         delete newRecord;
     }
+}
+
+std::vector<Record*> Table::getRecords() {
+    return records;
+}
+
+std::vector<std::vector<allVars>> Table::getTableDefinition() {
+    std::vector<std::vector<allVars>>tableData;
+    tableData.push_back({});
+    for (int i = 0; i < columns.size(); i++) {
+        tableData[0].push_back(columns[i]->getColumnName());
+    }
+    for (int k = 0; k < records.size(); k++) {
+        tableData.push_back({});
+        std::vector<Tlv*> tlvvec = records[k]->getRecordDataTlv();
+        for (int j = 0; j < tlvvec.size(); j++) {
+            tableData[k + 1].push_back(tlvvec[j]->getValue());
+        }
+    }
+    return tableData;
 }
 

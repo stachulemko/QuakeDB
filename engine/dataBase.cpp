@@ -3,6 +3,8 @@
 
 Database::Database() {
     createFolder(path);
+    wal = new Wal();
+    wal->createDirectoryAndFile();
 }
 
 Database::~Database() {
@@ -24,7 +26,7 @@ void Database::commit() {
 }
 
 void Database::addTable(std::string tableName) {
-    Table* newTable = new Table(tableName, path);
+    Table* newTable = new Table(tableName, path,wal);
     tables.push_back(newTable);
 }
 
@@ -156,11 +158,13 @@ void Database::loadDataBase() {
         for (const auto& entry : fs::directory_iterator(folder)) {
             if (!fs::is_directory(entry.status())) {
                 std::string fileName = entry.path().filename().string();
-                Table* table = new Table(fileName.substr(0, fileName.find_last_of('.')), folder);
+                Table* table = new Table(fileName.substr(0, fileName.find_last_of('.')), folder,wal);
                 std::vector<uint8_t> fileBytes = readFileBytes(entry.path().string());
+                wal->loadWal();
                 table->LoadColumnsDefinition(fileBytes);
                 table->LoadRecordDefinition(fileBytes);
                 tables.push_back(table);
+                //std::cout <<"table name" << fileName.substr(0, fileName.find_last_of('.')) << std::endl;
             }
         }
     }
@@ -168,7 +172,23 @@ void Database::loadDataBase() {
         std::cerr << "Error: " << e.what() << std::endl;
     }
 }
+void Database::showWal() {
+    wal->showWalData();
+}
 
 std::string Database::getPath() {
     return path;
+}
+
+void Database::clearQueryVariables() {
+    sqlQueryBytes.clear();
+    selectAcomplished = false;
+}
+
+std::vector<std::vector<allVars>> Database::getSqlQueryBytes() {
+    std::cout << "sqlQueryBytes size: " << sqlQueryBytes.size() << std::endl;
+    std::vector<std::vector<allVars>>tmpSqlQueryBytes = sqlQueryBytes;
+    clearQueryVariables();
+    return tmpSqlQueryBytes;
+
 }
