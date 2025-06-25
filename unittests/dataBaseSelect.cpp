@@ -281,12 +281,15 @@ TEST(dataBaseSelect, SelectAllColumns) {
     }
     else {
         // Powinny byæ dwie kolumny w wynikach
+        std::cout << "test1" << std::endl;
         EXPECT_EQ(vec[0].size(), 2);
         EXPECT_EQ(vec[1].size(), 2);
         EXPECT_EQ(std::get<int32_t>(vec[1][0]), 1);
         EXPECT_EQ(std::get<std::string>(vec[1][1]), "Alice");
+        std::cout << "test2" << std::endl;
     }
 
     deleteFile(db.getPath() + "/" + tableName + ".bin");
+    std::cout << "test3" << std::endl;
 }
 

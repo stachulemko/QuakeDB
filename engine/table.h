@@ -10,6 +10,7 @@
 #include "record.h"
 #include "typeManager.h"
 #include "wal.h"
+#include "dataBlock.h"
 
 class Table {
 private:
@@ -20,10 +21,18 @@ private:
     std::string path = "";
     int32_t lastColumnOffset = 0;
 
+    //-----------------------
+	std::vector<DataBlock>dataBlocks;
+    int64_t blockBefore = 0;
+
 public:
     Table(std::string name, std::string path,Wal *wal);
 
     ~Table();
+
+    void setBlockBefore(int32_t blockNum) {
+        blockBefore = blockNum;
+    }
 
     std::string getTableName() const;
 
@@ -37,9 +46,9 @@ public:
 
     std::vector<std::vector<allVars>>getTableDefinition();
 
-    void addRecord(std::vector< allVars>record);
+    void addRecord(std::vector< allVars>record);        // future update
 
-    void addColumn(std::string columnName, int type, bool allowNull);
+    void addColumn(std::string columnName, int type, bool allowNull);  // future update
 
     void showTable();
 
@@ -59,7 +68,21 @@ public:
 
     void LoadRecordDefinition(std::vector<uint8_t>allBinary);
 
+    void decodeBlock(std::vector<uint8_t > allBinary, int32_t& maxBlockNum);
 
+    std::vector<uint8_t> marshalTable();
+
+    std::vector<int64_t>getBlokcNum() {
+        std::vector<int64_t>nums;
+        for (int i = 0; i < dataBlocks.size(); i++) {
+            nums.push_back(dataBlocks[i].getBlockNum());
+        }
+        return nums;
+    }
+
+    //std::vector<DataBlock> getBlocks() {
+	//	return dataBlocks;
+    //}
 };
 
 #endif 

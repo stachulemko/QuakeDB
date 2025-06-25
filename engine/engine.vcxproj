@@ -22,6 +22,7 @@
     <ClCompile Include="binaryConverter.cpp" />
     <ClCompile Include="column.cpp" />
     <ClCompile Include="dataBase.cpp" />
+    <ClCompile Include="dataBlock.cpp" />
     <ClCompile Include="fileOperationManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="record.cpp" />
@@ -37,6 +38,7 @@
     <ClInclude Include="binaryConverter.h" />
     <ClInclude Include="column.h" />
     <ClInclude Include="dataBase.h" />
+    <ClInclude Include="dataBlock.h" />
     <ClInclude Include="fileOperationManager.h" />
     <ClInclude Include="record.h" />
     <ClInclude Include="select.h" />

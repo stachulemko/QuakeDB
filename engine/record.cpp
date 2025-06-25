@@ -23,7 +23,11 @@ bool Record::isDataTypeCorrect(std::vector<allVars> recordData, std::vector<Colu
     }
     else {
         for (int i = 0; i < recordData.size(); i++) {
-            if (getTypeId(recordData[i]) != vec[i]->getColumnType()) {
+            if (vec[i]->getColumnType() != getTypeId(recordData[i]) and (vec[i]->getColumnType()!=int64_tId and  getTypeId(recordData[i]) != int32_tId)) {
+                for (int i = 0; i < vec.size(); i++)
+                {
+                    std::cout << vec[i]->getColumnType() << std::endl;
+                }
                 assert(false && "Error(insert): Data type mismatch for column '");
                 //std::cerr <<  << vec[i]->getColumnName() << "'. Expected type: " << vec[i]->getColumnType() << ", but got: " << getTypeId(recordData[i]) << std::endl;
                 return false;

@@ -1,19 +1,16 @@
 #include "column.h"
 
 Column::Column(std::string name, int32_t columnType, bool allowNUll) {
-    clearAll();
-    columnName = new Tlv(name);
-    columnTypeTlv = new Tlv(columnType);
-    allowNull = new Tlv(allowNUll ? 1 : 0);
-    columnSize = new int32_t(columnName->getTlvSize() + columnTypeTlv->getTlvSize() + allowNull->getTlvSize());
-    /*
 	if (name.empty()) {
-        assert(false && "record data string empty"); 
+        assert(false && "column string name is empty"); 
 	}
     else {
-        
+        clearAll();
+        columnName = new Tlv(name);
+        columnTypeTlv = new Tlv(columnType);
+        allowNull = new Tlv(allowNUll ? 1 : 0);
+        columnSize = new int32_t(columnName->getTlvSize() + columnTypeTlv->getTlvSize() + allowNull->getTlvSize());
     }
-    */
 }
 
 Column::~Column() {
@@ -29,19 +26,21 @@ void Column::SetColumn(std::string name, int32_t columnType, bool allowNUll) {
 }
 
 int32_t Column::getColumnSize() {
-    int32_t sum = columnName->getTlvSize() + columnTypeTlv->getTlvSize() + allowNull->getTlvSize() ;
-    return sum;
+    //int32_t sum = columnName->getTlvSize() + columnTypeTlv->getTlvSize() + allowNull->getTlvSize() ;
+    return *columnSize;
 }
 
 std::string Column::getColumnName() {
     if (columnName != nullptr) {
-        return *(columnName->getStringValue());
+        const std::string* valuePtr = columnName->getStringValue();
+        if (valuePtr != nullptr) {
+            return *valuePtr;
+        }
     }
-    else {
-        std::cerr << "Column name is not set." << std::endl;
-        return "";
-    }
+    std::cerr << "Column name is not set or invalid." << std::endl;
+    return "";
 }
+
 
 int32_t Column::getColumnType() {
     if (columnTypeTlv != nullptr) {

@@ -16,10 +16,11 @@ void Database::commit() {
         deleteFile(path + "/" + table->getTableName() + ".bin");
         createBinFile(path, table->getTableName());
         std::vector<uint8_t> vec;
-        std::vector<uint8_t> columnDefinition = table->getColumnDefinition();
-        std::vector<uint8_t> recordDefinition = table->getRecordDefinition();
-        vec.insert(vec.end(), columnDefinition.begin(), columnDefinition.end());
-        vec.insert(vec.end(), recordDefinition.begin(), recordDefinition.end());
+        std::vector<uint8_t> block = table->marshalTable();
+        vec.insert(vec.end(), block.begin(), block.end());
+        //std::vector<uint8_t> recordDefinition = table->getRecordDefinition();
+        //vec.insert(vec.end(), columnDefinition.begin(), columnDefinition.end());
+        //vec.insert(vec.end(), recordDefinition.begin(), recordDefinition.end());
         std::string tableName = table->getTableName();
         addToFileBytes(path + "/" + tableName + ".bin", vec);
     }
@@ -66,12 +67,16 @@ void Database::showFile() {
 
 Database &Database::select(std::string tableName, std::vector<std::string> columnNames) {
     //showSelect(tables, tableName, columnNames);
+
 	selectAcomplished = true;
     sqlQueryBytes.clear();
     AllTableBytes.clear();
     for (int i = 0; i < tables.size(); i++) {
         if (tables[i]->getTableName() == tableName) {
             AllTableBytes = tables[i]->getTableDefinition();
+            std::cout << "0000000000000000000000" << std::endl;
+            //showVariantVectorOfVector(AllTableBytes);
+            std::cout << "0000000000000000000000" << std::endl;
             break;
         }
     }
@@ -161,8 +166,9 @@ void Database::loadDataBase() {
                 Table* table = new Table(fileName.substr(0, fileName.find_last_of('.')), folder,wal);
                 std::vector<uint8_t> fileBytes = readFileBytes(entry.path().string());
                 wal->loadWal();
-                table->LoadColumnsDefinition(fileBytes);
-                table->LoadRecordDefinition(fileBytes);
+                int32_t blockNumTmp = 0;
+				table->decodeBlock(fileBytes, blockNumTmp);
+                table->setBlockBefore(blockNumTmp);
                 tables.push_back(table);
                 //std::cout <<"table name" << fileName.substr(0, fileName.find_last_of('.')) << std::endl;
             }
@@ -181,14 +187,16 @@ std::string Database::getPath() {
 }
 
 void Database::clearQueryVariables() {
-    sqlQueryBytes.clear();
+    if (sqlQueryBytes.size() > 0) {
+        sqlQueryBytes.clear();
+    }
     selectAcomplished = false;
 }
 
 std::vector<std::vector<allVars>> Database::getSqlQueryBytes() {
-    std::cout << "sqlQueryBytes size: " << sqlQueryBytes.size() << std::endl;
-    std::vector<std::vector<allVars>>tmpSqlQueryBytes = sqlQueryBytes;
-    clearQueryVariables();
-    return tmpSqlQueryBytes;
+    //std::cout << "sqlQueryBytes size: " << sqlQueryBytes.size() << std::endl;
+    //std::vector<std::vector<allVars>>tmpSqlQueryBytes = sqlQueryBytes;
+    //clearQueryVariables();
+    return sqlQueryBytes;
 
 }

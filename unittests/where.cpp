@@ -70,10 +70,13 @@ TEST(WhereTests, DifferentDataTypesCondition) {
     db1.select("complexTable", { "id", "amount", "name" })
         .where("amount", ">", static_cast<int64_t>(2000000000000));
     std::vector<std::vector<allVars>> result = db1.getSqlQueryBytes();
-
+    std::cout << "result.size() : " << result.size() << std::endl;
     ASSERT_EQ(result.size(), 2); 
+	std::cout << "result[1][0] : " << std::get<int32_t>(result[1][0]) << std::endl;
     EXPECT_EQ(std::get<int32_t>(result[1][0]), 3);
+	std::cout << "result[1][1] : " << std::get<int64_t>(result[1][1]) << std::endl;
     EXPECT_EQ(std::get<int64_t>(result[1][1]), static_cast<int64_t>(3000000000000));
+	std::cout << "result[1][2] : " << std::get<std::string>(result[1][2]) << std::endl;
     EXPECT_EQ(std::get<std::string>(result[1][2]), "Product3");
 
     deleteFile(db.getPath() + "/complexTable.bin");

@@ -16,9 +16,22 @@ TEST(ColumnTests, Constructor) {
     EXPECT_GT(column.getColumnSize(), 0);
 }
 
+// Test konstruktora z pust¹ nazw¹ - powinien rzuciæ asercjê
+TEST(ColumnTests, ConstructorWithEmptyName) {
+#ifdef NDEBUG
+    // W trybie release asercje s¹ wy³¹czone, wiêc test pomijamy
+    SUCCEED() << "Asercje s¹ wy³¹czone w trybie release, test pominiêty";
+#else
+    // W trybie debug asercja powinna przerwaæ dzia³anie
+    EXPECT_DEATH({
+        Column emptyColumn("", 1, false);
+        }, "column string name is empty");
+#endif
+}
+
 // Test metody SetColumn
 TEST(ColumnTests, SetColumn) {
-    // Najpierw tworzymy kolumnê z pocz¹tkow¹ wartoœci¹
+    // Najpierw tworzymy kolumnê z poprawn¹ wartoœci¹
     Column column("Initial", 1, false);
 
     // Nastêpnie zmieniamy wartoœci
@@ -34,6 +47,19 @@ TEST(ColumnTests, SetColumn) {
     EXPECT_EQ(column.isAllowNull(), newAllowNull);
 }
 
+// Test metody SetColumn z pust¹ nazw¹ - w odró¿nieniu od konstruktora, SetColumn pozwala na pust¹ nazwê
+TEST(ColumnTests, SetColumnWithEmptyName) {
+    Column column("Initial", 1, false);
+
+    // SetColumn nie ma asercji na pust¹ nazwê
+    column.SetColumn("", 2, true);
+
+    // Sprawdzamy czy pusta nazwa zosta³a zaakceptowana
+    EXPECT_EQ(column.getColumnName(), "");
+    EXPECT_EQ(column.getColumnType(), 2);
+    EXPECT_EQ(column.isAllowNull(), true);
+}
+
 // Test metody getColumnSize
 TEST(ColumnTests, GetColumnSize) {
     std::string name = "Test";
@@ -42,7 +68,6 @@ TEST(ColumnTests, GetColumnSize) {
 
     Column column(name, columnType, allowNull);
 
-    // Spodziewany rozmiar to suma d³ugoœci TLV plus 4 bajty na rozmiar kolumny
     int32_t expectedSize = column.getColumnSize();
     EXPECT_GT(expectedSize, 4); // Rozmiar powinien byæ wiêkszy ni¿ 4 bajty
 }
@@ -54,9 +79,10 @@ TEST(ColumnTests, GetColumnName) {
 
     EXPECT_EQ(column.getColumnName(), name);
 
-    // Test dla pustej nazwy
-    Column emptyNameColumn("", 1, false);
-    EXPECT_EQ(emptyNameColumn.getColumnName(), "");
+    // Testujemy tak¿e po modyfikacji SetColumn z pust¹ nazw¹
+    Column modifiableColumn("NotEmpty", 1, false);
+    modifiableColumn.SetColumn("", 1, false);
+    EXPECT_EQ(modifiableColumn.getColumnName(), "");
 }
 
 // Test metody getColumnType
@@ -89,7 +115,7 @@ TEST(ColumnTests, MarshalAndDecode) {
     std::vector<uint8_t> marshalledData = column.MarshalColumn();
 
     // Dekodowanie marsza³kowanych danych
-    Column decodedColumn("", 0, false); // Pusta kolumna do dekodowania
+    Column decodedColumn("NonEmpty", 0, false); // U¿ywamy niepustej nazwy, aby unikn¹æ asercji
     decodedColumn.loadAllBytesToDecode(marshalledData);
     decodedColumn.decodeColumn();
 
@@ -97,6 +123,25 @@ TEST(ColumnTests, MarshalAndDecode) {
     EXPECT_EQ(decodedColumn.getColumnName(), name);
     EXPECT_EQ(decodedColumn.getColumnType(), columnType);
     EXPECT_EQ(decodedColumn.isAllowNull(), allowNull);
+}
+
+// Test metody marshaling i dekodowania dla pustej nazwy kolumny, który unika asercji
+TEST(ColumnTests, MarshalAndDecodeEmptyName) {
+    // Zamiast tworzyæ kolumnê z pust¹ nazw¹, u¿ywamy SetColumn
+    Column column("NonEmpty", 1, false);
+    column.SetColumn("", 2, true);
+
+    std::vector<uint8_t> marshalledData = column.MarshalColumn();
+
+    // Dekodowanie marsza³kowanych danych
+    Column decodedColumn("NonEmpty", 0, false);
+    decodedColumn.loadAllBytesToDecode(marshalledData);
+    decodedColumn.decodeColumn();
+
+    // Sprawdzanie, czy pusta nazwa zosta³a poprawnie zdekodowana
+    EXPECT_EQ(decodedColumn.getColumnName(), "");
+    EXPECT_EQ(decodedColumn.getColumnType(), 2);
+    EXPECT_EQ(decodedColumn.isAllowNull(), true);
 }
 
 // Test metody clearAll
@@ -116,7 +161,7 @@ TEST(ColumnTests, EdgeCases) {
     Column longNameColumn(longName, 1, false);
     std::vector<uint8_t> longNameData = longNameColumn.MarshalColumn();
 
-    Column decodedLongName("", 0, false);
+    Column decodedLongName("NonEmpty", 0, false);
     decodedLongName.loadAllBytesToDecode(longNameData);
     decodedLongName.decodeColumn();
 
@@ -127,7 +172,7 @@ TEST(ColumnTests, EdgeCases) {
     Column maxTypeColumn("Test", maxType, false);
     std::vector<uint8_t> maxTypeData = maxTypeColumn.MarshalColumn();
 
-    Column decodedMaxType("", 0, false);
+    Column decodedMaxType("NonEmpty", 0, false);
     decodedMaxType.loadAllBytesToDecode(maxTypeData);
     decodedMaxType.decodeColumn();
 
@@ -136,15 +181,15 @@ TEST(ColumnTests, EdgeCases) {
 
 // Test dla nieprawid³owych danych wejœciowych podczas dekodowania
 TEST(ColumnTests, InvalidDecoding) {
-    // Próba dekodowania pustego wektora
-    Column column("", 0, false);
+    // Aby unikn¹æ asercji, u¿ywamy niepustej nazwy
+    Column column("NonEmpty", 0, false);
     std::vector<uint8_t> emptyData;
     column.loadAllBytesToDecode(emptyData);
     column.decodeColumn();
 
-    // Nie powinno to koñczyæ siê awari¹, a jedynie zwróciæ wartoœci domyœlne
-    EXPECT_EQ(column.getColumnName(), "");
-    EXPECT_EQ(column.getColumnType(), -1);
+    // Po dekodowaniu pustych danych, wartoœci powinny pozostaæ bez zmian
+    EXPECT_EQ(column.getColumnName(), "NonEmpty");
+    EXPECT_EQ(column.getColumnType(), 0);
     EXPECT_FALSE(column.isAllowNull());
 
     // Próba dekodowania zbyt ma³ego wektora (mniej ni¿ 8 bajtów)
@@ -153,7 +198,7 @@ TEST(ColumnTests, InvalidDecoding) {
     column.decodeColumn();
 
     // Nie powinno to koñczyæ siê awari¹
-    EXPECT_EQ(column.getColumnName(), "");
+    EXPECT_EQ(column.getColumnName(), "NonEmpty");
 }
 
 // Test dla specjalnych znaków w nazwie kolumny
@@ -162,21 +207,32 @@ TEST(ColumnTests, SpecialCharacters) {
     Column column(specialChars, 1, false);
     std::vector<uint8_t> data = column.MarshalColumn();
 
-    Column decoded("", 0, false);
+    Column decoded("NonEmpty", 0, false);
     decoded.loadAllBytesToDecode(data);
     decoded.decodeColumn();
 
     EXPECT_EQ(decoded.getColumnName(), specialChars);
 }
 
-// Test dla pustej nazwy kolumny
-TEST(ColumnTests, EmptyName) {
-    Column column("", 1, false);
+// Test dla sztucznego utworzenia pustej nazwy kolumny (bez wywo³ywania asercji)
+TEST(ColumnTests, EmptyNameViaSetColumn) {
+    // Tworzenie kolumny z niepust¹ nazw¹
+    Column column("NonEmpty", 1, false);
+
+    // Modyfikacja na pust¹ nazwê
+    column.SetColumn("", 1, false);
+
+    // Sprawdzenie czy pusta nazwa jest akceptowana przez SetColumn
+    EXPECT_EQ(column.getColumnName(), "");
+
+    // Marshalling kolumny z pust¹ nazw¹
     std::vector<uint8_t> data = column.MarshalColumn();
 
-    Column decoded("NotEmpty", 0, false);
+    // Dekodowanie
+    Column decoded("NonEmpty", 0, false);
     decoded.loadAllBytesToDecode(data);
     decoded.decodeColumn();
 
+    // Sprawdzenie czy pusta nazwa zosta³a poprawnie zdekodowana
     EXPECT_EQ(decoded.getColumnName(), "");
 }

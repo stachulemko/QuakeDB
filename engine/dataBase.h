@@ -65,6 +65,17 @@ public:
 	std::vector<Table*> getTables() {
 		return tables;
 	}
+
+    std::vector<int64_t> getTableBlockNums(std::string tableName) {
+        std::vector<int64_t> vecNums;
+        for (int i = 0; i < tables.size(); i++) {
+            if (tables[i]->getTableName() == tableName) {
+                vecNums = tables[i]->getBlokcNum();
+            }
+        }
+        return vecNums; // Dodana instrukcja return
+    }
+
 };
 
 #endif

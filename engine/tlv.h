@@ -34,11 +34,26 @@ public:
     Tlv(std::vector<uint8_t> allConnectedBytes);
 
     ~Tlv();
-    const int32_t* getInt32Value() const { return int32_tValue; }
+    const int32_t* getInt32Value() const { 
+        if (int32_tValue != nullptr) {
+            return int32_tValue;
+        } 
+        return nullptr;
+    }
 
-    const int64_t* getInt64Value() const { return int64_tValue; }
+    const int64_t* getInt64Value() const { 
+        if (int64_tValue != nullptr) {
+            return int64_tValue;
+        }
+        return nullptr;
+    }
 
-    const std::string* getStringValue() const { return stringValue; }
+    const std::string* getStringValue() const { 
+        if (stringValue != nullptr) {
+            return stringValue;
+        }
+        return nullptr;
+    }
 
     int32_t getTlvSize();
 

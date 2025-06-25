@@ -117,11 +117,7 @@ void Tlv::decode() {
     }
     //clearAll();
     std::vector<uint8_t> typeBytes;
-    for (int i=0;i<=3;i++){
-        typeBytes.push_back((*allConnectedBytes)[i]);
-    }
-    std::vector<uint8_t> LenghtBytes;
-    for (int i = 4; i <= 6; i++) {
+    for (int i = 0; i < 4; i++) {  // U¿ywamy 0-3 (4 bajty)
         typeBytes.push_back((*allConnectedBytes)[i]);
     }
     type = new int32_t();
