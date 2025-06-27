@@ -23,7 +23,7 @@ bool Record::isDataTypeCorrect(std::vector<allVars> recordData, std::vector<Colu
     }
     else {
         for (int i = 0; i < recordData.size(); i++) {
-            if (vec[i]->getColumnType() != getTypeId(recordData[i]) and (vec[i]->getColumnType()!=int64_tId and  getTypeId(recordData[i]) != int32_tId)) {
+            if (vec[i]->getColumnType() != getTypeId(recordData[i]) /* and (vec[i]->getColumnType() != int64_tId and getTypeId(recordData[i]) != int32_tId)*/) {
                 for (int i = 0; i < vec.size(); i++)
                 {
                     std::cout << vec[i]->getColumnType() << std::endl;

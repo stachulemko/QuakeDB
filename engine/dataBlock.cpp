@@ -59,6 +59,37 @@ DataBlock::DataBlock(int64_t& blockIdBefore, Wal* wal) {
     blockIdBefore++;
 }
 
+DataBlock::DataBlock(int64_t& blockIdBefore, Wal* wal, const std::vector<Column*>& columnsToClone) {
+    this->wal = wal;
+    blockNum = blockIdBefore + 1;
+    blockIdBefore++;
+
+    // Kopiowanie kolumn
+    for (auto& col : columnsToClone) {
+        std::cout <<"col type : " << col->getColumnType() << std::endl;
+        columns.push_back(new Column(col->getColumnName(), col->getColumnType(), col->isAllowNull()));
+    }
+    std::cout <<"columns size() : " << columns.size() << std::endl;
+}
+
+
+DataBlock::DataBlock(const DataBlock& other) {
+    this->wal = other.wal;
+    this->blockNum = other.blockNum;
+    this->currentBlockSize = other.currentBlockSize;
+    this->lastColumnOffset = other.lastColumnOffset;
+
+    // G³êbokie kopiowanie kolumn
+    for (auto& col : other.columns) {
+        columns.push_back(new Column(col->getColumnName(), col->getColumnType(), col->isAllowNull()));
+    }
+
+    // G³êbokie kopiowanie rekordów (jeœli potrzebujesz)
+    // To wymaga³oby implementacji konstruktora kopiowania dla klasy Record
+}
+
+
+
 DataBlock::~DataBlock() {
     for (auto column : columns) {
         delete column;
@@ -67,6 +98,40 @@ DataBlock::~DataBlock() {
         delete record;
     }
 }
+
+
+
+// Operator przypisania kopiowania
+DataBlock& DataBlock::operator=(const DataBlock& other) {
+    if (this != &other) {
+        // Zwolnij istniej¹ce zasoby
+        for (auto column : columns) {
+            delete column;
+        }
+        for (auto record : records) {
+            delete record;
+        }
+        columns.clear();
+        records.clear();
+
+        // Kopiuj nowe zasoby
+        this->wal = other.wal;
+        this->blockNum = other.blockNum;
+        this->currentBlockSize = other.currentBlockSize;
+        this->lastColumnOffset = other.lastColumnOffset;
+
+        // G³êbokie kopiowanie kolumn
+        for (auto& col : other.columns) {
+            columns.push_back(new Column(col->getColumnName(), col->getColumnType(), col->isAllowNull()));
+        }
+
+        // G³êbokie kopiowanie rekordów
+        // Podobnie jak w konstruktorze kopiowania
+    }
+    return *this;
+}
+
+
 std::vector<Record*> DataBlock::getRecordsRaw() {
     return records;
 }
@@ -82,7 +147,8 @@ void DataBlock::addColumn(std::string columnName, int type, bool allowNull, std:
         wal->addToWall(newColumn->MarshalColumn(), addColumnTypeId, { newColumn->getColumnType(),newColumn->getColumnSize(),newColumn->getColumnName() }, newColumn->getColumnSize());
     }
     else {
-        dataBlocks.push_back(DataBlock(blockNum, wal));
+        //dataBlocks.push_back(DataBlock(blockNum, wal));
+        dataBlocks.emplace_back(DataBlock(blockNum, wal));
         dataBlocks[dataBlocks.size() - 1].addColumn(columnName, type, allowNull, dataBlocks);
         setCurrentBlockSize(newColumn->getColumnSize() + 8);
     }
@@ -97,8 +163,10 @@ void DataBlock::addRecord(std::vector<allVars> record, std::vector<DataBlock>& d
         wal->addToWall(newRecord->MarshalRecord(), insertTypeId, newRecord->getRecordData(), newRecord->getRecordSize());
     }
     else {
-        dataBlocks.push_back(DataBlock(blockNum, wal));
-        dataBlocks[dataBlocks.size() - 1].addRecord(record, dataBlocks);
+        //dataBlocks.push_back(DataBlock(blockNum, wal,columns));
+        dataBlocks.emplace_back(blockNum, wal, columns);
+        dataBlocks[dataBlocks.size() - 1].addRecord(record,dataBlocks);
+        //dataBlocks[dataBlocks.size() - 1].addRecord(record, dataBlocks);
         setCurrentBlockSize(newRecord->getRecordSize());
     }
 }

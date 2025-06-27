@@ -35,11 +35,22 @@ private:
 public:
     DataBlock(int64_t& blockIdBefore, Wal* wal);
 
+    DataBlock(int64_t& blockIdBefore, Wal* wal, const std::vector<Column*>& columnsToClone);
+
+    DataBlock& operator=(const DataBlock& other);
+
+    DataBlock(const DataBlock& other);
+
     ~DataBlock();
 
     std::vector<Record*> getRecordsRaw();
 
     void setCurrentBlockSize(int number);
+
+    void addColumnPointer(Column* column) {
+        columns.push_back(column);
+    }
+
 
     void addColumn(std::string columnName, int type, bool allowNull, std::vector<DataBlock>& dataBlocks);
 
