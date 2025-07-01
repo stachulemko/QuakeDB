@@ -37,6 +37,8 @@ public:
 
     DataBlock(int64_t& blockIdBefore, Wal* wal, const std::vector<Column*>& columnsToClone);
 
+    DataBlock(const DataBlock& other);
+
     ~DataBlock();
 
     std::vector<Record*> getRecordsRaw();

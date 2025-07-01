@@ -75,6 +75,26 @@ DataBlock::DataBlock(int64_t& blockIdBefore, Wal* wal, const std::vector<Column*
 }
 
 
+DataBlock::DataBlock(const DataBlock& other)
+    : wal(other.wal),
+    currentBlockSize(other.currentBlockSize),
+    blockNum(other.blockNum),
+    lastColumnOffset(other.lastColumnOffset)
+{
+    // G³êbokie kopiowanie kolumn
+    for (auto col : other.columns) {
+        // Zak³adamy, ¿e konstruktor Column(z nazwy, typu oraz flagi allowNull)
+        // wykonuje g³êbok¹ kopiê. Jeœli masz konstruktor kopiuj¹cy w Column, mo¿esz go te¿ wywo³aæ.
+        columns.push_back(new Column(col->getColumnName(), col->getColumnType(), col->isAllowNull()));
+    }
+
+    // G³êbokie kopiowanie rekordów (jeœli Record posiada konstruktor kopiuj¹cy)
+    for (auto rec : other.records) {
+        records.push_back(new Record(*rec));
+    }
+}
+
+
 DataBlock::~DataBlock() {
     for (auto column : columns) {
         delete column;
@@ -101,8 +121,8 @@ void DataBlock::addColumn(std::string columnName, int type, bool allowNull, std:
         wal->addToWall(newColumn->MarshalColumn(), addColumnTypeId, { newColumn->getColumnType(),newColumn->getColumnSize(),newColumn->getColumnName() }, newColumn->getColumnSize());
     }
     else {
-        //dataBlocks.push_back(DataBlock(blockNum, wal));
-        dataBlocks.emplace_back(DataBlock(blockNum, wal));
+        dataBlocks.push_back(DataBlock(blockNum, wal));
+        //dataBlocks.emplace_back(blockNum, wal);
         dataBlocks[dataBlocks.size() - 1].addColumn(columnName, type, allowNull, dataBlocks);
         setCurrentBlockSize(newColumn->getColumnSize() + 8);
     }
@@ -117,8 +137,8 @@ void DataBlock::addRecord(std::vector<allVars> record, std::vector<DataBlock>& d
         wal->addToWall(newRecord->MarshalRecord(), insertTypeId, newRecord->getRecordData(), newRecord->getRecordSize());
     }
     else {
-        //dataBlocks.push_back(DataBlock(blockNum, wal,columns));
-        dataBlocks.emplace_back(blockNum, wal, columns);
+        dataBlocks.push_back(DataBlock(blockNum, wal,columns));
+        //dataBlocks.emplace_back(blockNum, wal, columns);
         dataBlocks[dataBlocks.size() - 1].addRecord(record,dataBlocks);
         //dataBlocks[dataBlocks.size() - 1].addRecord(record, dataBlocks);
         setCurrentBlockSize(newRecord->getRecordSize());

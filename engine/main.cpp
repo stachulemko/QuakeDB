@@ -3,19 +3,27 @@
 #include "tlv.h"
 #include "dataBase.h"
 int main() {
+    std::string tableName = "manyColumnsTable";
+    const int numColumns = 100; // Du¿a liczba kolumn
+
     Database db;
-    std::string name = "test1";
-    db.addTable(name);
-    db.addColumn(name, "t1", 1, true);
+    db.addTable(tableName);
+
+    // Dodaj du¿¹ liczbê kolumn
+    for (int i = 0; i < numColumns; i++) {
+        std::string colName = "col" + std::to_string(i);
+        int dataType = (i % 3) + 1; // Typy 1, 2, 3 rotacyjnie
+        bool allowNull = (i % 2 == 0); // Naprzemiennie true/false
+		std::cout << "colName : " << colName << "data type : " << dataType << " allowNull : " << allowNull << std::endl;
+        db.addColumn(tableName, colName, dataType, allowNull);
+    }
+
     db.commit();
 
-    Database db1;
-    db1.loadDataBase();
-    db1.addColumn(name, "t3", 2, true);
-    db1.commit();
+    // £adujemy bazê danych ponownie
+    Database loadDb;
+    loadDb.loadDataBase();
 
-    Database db2;
-    db2.loadDataBase();
-    db2.select(name, { "*" });
-    db2.showSqQuery();
+    // Sprawdzamy czy wszystkie kolumny zosta³y wczytane
+    std::vector<std::vector<std::string>> tableColumns = loadDb.getTableColumnsNames();
 }

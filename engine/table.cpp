@@ -157,15 +157,24 @@ void Table::decodeBlock(std::vector<uint8_t>allBinary,int32_t &maxBlockNum) {
 				UnmarshalInt32_t(&size, &sizeBinary);
 				if (offset + 8 + size <= allBinary.size()) {
 					std::vector<uint8_t> blockNumBytes(allBinary.begin() + offset + 8, allBinary.begin() + offset + 8 + size);
+                    std::cout << "=============" << std::endl;
+                    showBytes(blockNumBytes);
+                    std::cout << "=============" << std::endl;
                     int64_t blockNum = 0;
 					UnmarshalInt64_t(&blockNum, &blockNumBytes);
                     //==================================
                     int32_t lenghtType = 0;
                     std::vector<uint8_t> blockIdBytes(allBinary.begin() + offset+16, allBinary.begin() + offset + 20);
+                    std::cout << "=============" << std::endl;
+                    showBytes(blockIdBytes);
+                    std::cout << "=============" << std::endl;
                     UnmarshalInt32_t(&lenghtType, &blockIdBytes);
                     if (lenghtType == int32_tId) {
                         int32_t lenghtNum = 0;
-                        std::vector<uint8_t> LenghtIdBytes(allBinary.begin() + offset+ 20, allBinary.begin() + 24);
+                        std::vector<uint8_t> LenghtIdBytes(allBinary.begin() + offset+ 20, allBinary.begin()+ offset + 24);
+                        std::cout << "=============" << std::endl;
+                        showBytes(LenghtIdBytes);
+                        std::cout << "=============" << std::endl;
                         UnmarshalInt32_t(&lenghtNum, &LenghtIdBytes);
                         if (lenghtNum == 4) {
                             int32_t valueLenght = 0;
