@@ -29,6 +29,7 @@ void DataBlock::LoadColumnsDefinition(std::vector<uint8_t> allBinary) {
             break;
         }
     }
+    lastColumnOffset = offset;
 }
 
 void DataBlock::LoadRecordDefinition(std::vector<uint8_t>allBinary) {
@@ -51,6 +52,7 @@ void DataBlock::LoadRecordDefinition(std::vector<uint8_t>allBinary) {
             break;
         }
     }
+    currentBlockSize = offset;
 }
 
 DataBlock::DataBlock(int64_t& blockIdBefore, Wal* wal) {
@@ -73,23 +75,6 @@ DataBlock::DataBlock(int64_t& blockIdBefore, Wal* wal, const std::vector<Column*
 }
 
 
-DataBlock::DataBlock(const DataBlock& other) {
-    this->wal = other.wal;
-    this->blockNum = other.blockNum;
-    this->currentBlockSize = other.currentBlockSize;
-    this->lastColumnOffset = other.lastColumnOffset;
-
-    // G³êbokie kopiowanie kolumn
-    for (auto& col : other.columns) {
-        columns.push_back(new Column(col->getColumnName(), col->getColumnType(), col->isAllowNull()));
-    }
-
-    // G³êbokie kopiowanie rekordów (jeœli potrzebujesz)
-    // To wymaga³oby implementacji konstruktora kopiowania dla klasy Record
-}
-
-
-
 DataBlock::~DataBlock() {
     for (auto column : columns) {
         delete column;
@@ -99,37 +84,6 @@ DataBlock::~DataBlock() {
     }
 }
 
-
-
-// Operator przypisania kopiowania
-DataBlock& DataBlock::operator=(const DataBlock& other) {
-    if (this != &other) {
-        // Zwolnij istniej¹ce zasoby
-        for (auto column : columns) {
-            delete column;
-        }
-        for (auto record : records) {
-            delete record;
-        }
-        columns.clear();
-        records.clear();
-
-        // Kopiuj nowe zasoby
-        this->wal = other.wal;
-        this->blockNum = other.blockNum;
-        this->currentBlockSize = other.currentBlockSize;
-        this->lastColumnOffset = other.lastColumnOffset;
-
-        // G³êbokie kopiowanie kolumn
-        for (auto& col : other.columns) {
-            columns.push_back(new Column(col->getColumnName(), col->getColumnType(), col->isAllowNull()));
-        }
-
-        // G³êbokie kopiowanie rekordów
-        // Podobnie jak w konstruktorze kopiowania
-    }
-    return *this;
-}
 
 
 std::vector<Record*> DataBlock::getRecordsRaw() {

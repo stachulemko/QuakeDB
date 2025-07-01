@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="binaryConverter.cpp" />
+    <ClCompile Include="bTree.cpp" />
+    <ClCompile Include="bTreeNode.cpp" />
     <ClCompile Include="column.cpp" />
     <ClCompile Include="dataBase.cpp" />
     <ClCompile Include="dataBlock.cpp" />
@@ -36,6 +38,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="binaryConverter.h" />
+    <ClInclude Include="bTree.h" />
+    <ClInclude Include="bTreeNode.h" />
     <ClInclude Include="column.h" />
     <ClInclude Include="dataBase.h" />
     <ClInclude Include="dataBlock.h" />
