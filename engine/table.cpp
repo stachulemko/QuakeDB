@@ -58,6 +58,7 @@ std::vector<std::string> Table::getColumnName() {
     }
     return vec;
 }
+/*
 std::vector<uint8_t>Table::getColumnDefinition() {
     std::vector<uint8_t> result;
     for (const auto& column : columns) {
@@ -104,6 +105,7 @@ void Table::LoadColumnsDefinition(std::vector<uint8_t> allBinary) {
         }
     }
 }
+*/
 std::vector<uint8_t> Table::marshalTable() {
 	std::vector<uint8_t> result;
     for (auto block : dataBlocks) {
@@ -113,6 +115,7 @@ std::vector<uint8_t> Table::marshalTable() {
     return result;
 }
 
+/*
 void Table::LoadRecordDefinition(std::vector<uint8_t>allBinary) {
     size_t offset = lastColumnOffset;
     int32_t size = 0;
@@ -134,6 +137,8 @@ void Table::LoadRecordDefinition(std::vector<uint8_t>allBinary) {
         }
     }
 }
+*/
+
 void Table::decodeBlock(std::vector<uint8_t>allBinary,int32_t &maxBlockNum) {
     int32_t offset = 0;
 
@@ -224,6 +229,7 @@ std::string Table::getTableName() {
 	return tableName;
 }
 
+/*
 std::vector<std::vector<int32_t>> Table::getTypeAndAllowNUll() {
     std::vector<std::vector<int32_t>>allvec;
     for (int i = 0; i < columns.size(); i++) {
@@ -236,6 +242,8 @@ std::vector<std::vector<int32_t>> Table::getTypeAndAllowNUll() {
     }
 	return allvec;
 }
+
+*/
 
 void Table::addRecord(std::vector< allVars>record) {
     dataBlocks[dataBlocks.size() - 1].addRecord(record, dataBlocks);

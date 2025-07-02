@@ -11,19 +11,22 @@
 #include "typeManager.h"
 #include "wal.h"
 #include "dataBlock.h"
+#include "bTreeManager.h"
 
 class Table {
 private:
     Wal *wal;
     std::string tableName;
-    std::vector<Column*> columns;
-	std::vector<Record*> records;
+    //std::vector<Column*> columns;
+	//std::vector<Record*> records;
     std::string path = "";
     int32_t lastColumnOffset = 0;
 
     //-----------------------
 	std::vector<DataBlock>dataBlocks;
     int64_t blockBefore = 0;
+
+	std::vector<BtreeManager<allVars>*> bTreeManagers;
 
 public:
     Table(std::string name, std::string path,Wal *wal);
@@ -40,7 +43,7 @@ public:
 
     std::string getTableName();
 
-    std::vector<std::vector<int32_t>> getTypeAndAllowNUll();
+    //std::vector<std::vector<int32_t>> getTypeAndAllowNUll();
 
     std::vector<Record*> getRecords();
 
@@ -52,21 +55,23 @@ public:
 
     void showTable();
 
+    /*
 	void showRecords() {
 		for (const auto& record : records) {
 			record->showRecord();
 		}
 	}
+    */
 
     void clearAll();
+    
+    //std::vector<uint8_t>getColumnDefinition();
+    
+    //std::vector<uint8_t> getRecordDefinition();
 
-    std::vector<uint8_t>getColumnDefinition();
+    //void LoadColumnsDefinition(std::vector<uint8_t> allBinary);
 
-    std::vector<uint8_t> getRecordDefinition();
-
-    void LoadColumnsDefinition(std::vector<uint8_t> allBinary);
-
-    void LoadRecordDefinition(std::vector<uint8_t>allBinary);
+    //void LoadRecordDefinition(std::vector<uint8_t>allBinary);
 
     void decodeBlock(std::vector<uint8_t > allBinary, int32_t& maxBlockNum);
 

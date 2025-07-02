@@ -137,7 +137,7 @@ void Database::showRecords() {
     }
     std::cout << "-------------records-------------" << std::endl;
     for (int i = 0; i < tables.size(); i++) {
-        tables[i]->showRecords();
+        //tables[i]->showRecords();
     }
 }
 
@@ -152,7 +152,7 @@ std::vector<std::vector<std::string>> Database::getTableColumnsNames() {
 std::vector<std::vector<std::vector<int32_t>>> Database::getTypeAndAllowNUllTables() {
     std::vector<std::vector<std::vector<int32_t>>> typeAndAllowNullTables;
     for (int i = 0; i < tables.size(); i++) {
-        typeAndAllowNullTables.push_back(tables[i]->getTypeAndAllowNUll());
+        //typeAndAllowNullTables.push_back(tables[i]->getTypeAndAllowNUll());
     }
     return typeAndAllowNullTables;
 }
