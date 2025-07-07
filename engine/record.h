@@ -37,6 +37,14 @@ public:
     void loadAllConnectedBytes(std::vector<uint8_t> bytes);
 
     void decode();
+
+    allVars getColumnDataByIndex(int index) {
+        for (int i = 0; i < recordDataTlv.size(); i++) {
+			if (i == index) {
+				return recordDataTlv[i]->getValue();
+			}
+        }
+    }
 };
 #endif
 

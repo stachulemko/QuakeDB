@@ -68,11 +68,11 @@ public:
         for (size_t i = 0; i < node->getNames().size(); i++) {
             if (i < node->getNames().size() / 2) {
                 b1->addName(tmpNames[i].second, tmpNames[i].first);
-                std::cout << "Adding to b1: " << tmpNames[i].second << std::endl;
+                //std::cout << "Adding to b1: " << tmpNames[i].second << std::endl;
             }
             else if (i > node->getNames().size() / 2) {
                 b2->addName(tmpNames[i].second, tmpNames[i].first);
-                std::cout << "Adding to b2: " << tmpNames[i].second << std::endl;
+                //std::cout << "Adding to b2: " << tmpNames[i].second << std::endl;
             }
         }
 

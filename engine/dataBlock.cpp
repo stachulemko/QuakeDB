@@ -58,13 +58,13 @@ void DataBlock::LoadRecordDefinition(std::vector<uint8_t>allBinary) {
 DataBlock::DataBlock(int64_t& blockIdBefore, Wal* wal) {
     this->wal = wal;
     blockNum = blockIdBefore + 1;
-    blockIdBefore++;
+    //blockIdBefore++;
 }
 
 DataBlock::DataBlock(int64_t& blockIdBefore, Wal* wal, const std::vector<Column*>& columnsToClone) {
     this->wal = wal;
     blockNum = blockIdBefore + 1;
-    blockIdBefore++;
+    //blockIdBefore++;
 
     // Kopiowanie kolumn
     for (auto& col : columnsToClone) {
@@ -137,6 +137,9 @@ void DataBlock::addRecord(std::vector<allVars> record, std::vector<DataBlock>& d
         wal->addToWall(newRecord->MarshalRecord(), insertTypeId, newRecord->getRecordData(), newRecord->getRecordSize());
     }
     else {
+        for (int i = 0; i < dataBlocks.size(); i++) {
+			std::cout << dataBlocks[i].getBlockNum() << " " << dataBlocks[i].currentBlockSize << std::endl;
+        }
         dataBlocks.push_back(DataBlock(blockNum, wal,columns));
         //dataBlocks.emplace_back(blockNum, wal, columns);
         dataBlocks[dataBlocks.size() - 1].addRecord(record,dataBlocks);

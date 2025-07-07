@@ -49,6 +49,36 @@ public:
         columns.push_back(column);
     }
 
+    bool ifColumnExists(std::string columnName) {
+        for (int i = 0; i < columns.size(); i++) {
+			if (columns[i]->getColumnName() == columnName) {
+				return true;
+			}
+        }
+        return false;
+    }
+
+    int getColumnIndex(std::string columnName) {
+        for (int i = 0; i < columns.size(); i++) {
+            if (columns[i]->getColumnName() == columnName) {
+                return i;
+            }
+        }
+    }
+
+    std::vector<allVars> getColumnValues(std::string columnName) {
+		int index = getColumnIndex(columnName);
+        std::vector<allVars>vec;
+        for (int i = 0; i < records.size(); i++) {
+            vec.push_back(records[i]->getRecordDataTlv()[index]->getValue());
+            /*
+			if (index < records[i]->getRecordDataTlv().size()) {
+				return 
+			}
+            */
+        }
+		return vec;
+    }
 
     void addColumn(std::string columnName, int type, bool allowNull, std::vector<DataBlock>& dataBlocks);
 

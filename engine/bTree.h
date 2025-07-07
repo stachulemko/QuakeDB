@@ -67,14 +67,18 @@ public:
         while (!tmp->getChildrens().empty()) {
             bool moved = false;
             for (size_t i = 0; i < tmp->getNames().size(); ++i) {
-                if (!isGreater(val, tmp->getNames()[i].second)) {
+                if (!isGreater(val, tmp->getNames()[i].second) && !isEqual(val, tmp->getNames()[i].second)) {
                     tmp = tmp->getChildrens()[i];
                     moved = true;
                     break;
                 }
-                else if (!isEqual(val, tmp->getNames()[i].second)) {
+                else if (isEqual(val, tmp->getNames()[i].second)) {
 					return tmp->getNames()[i].first;
                 }
+            }
+            if (!moved) {
+                //path.push_back(tmp);
+                tmp = tmp->getChildrens()[tmp->getChildrens().size() - 1];
             }
             /*
             if (!moved) {

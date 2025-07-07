@@ -75,7 +75,27 @@ public:
         }
         return vecNums; // Dodana instrukcja return
     }
-
+    void addBtree(std::string tableName,std::string columnName) {
+        for (int i = 0; i < tables.size(); i++) {
+            if (tables[i]->getTableName() == tableName) {
+				tables[i]->addBtree(columnName);
+            }
+            else {
+                //assert not exist table - later !! 
+            }
+        }
+    }
+    // test fuction only for test reason 
+    int getBlockNum(std::string tableName, std::string columnName,allVars data) {
+        for (int i = 0; i < tables.size(); i++) {
+            if (tables[i]->getTableName() == tableName) {
+				return tables[i]->getBlockNum(columnName, data);
+            }
+            else {
+                //assert not exist table - later !! 
+            }
+        }
+    }
 };
 
 #endif

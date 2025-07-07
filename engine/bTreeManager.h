@@ -10,22 +10,28 @@ template <typename T>
 class BtreeManager {
 private:
 	Btree<T>* bTree;
+	int columnIndex = 0;
 	int t;
 public:
-	BtreeManager(int t, std::vector<std::pair<T, int>>names, std::string tableName) {
+	BtreeManager(int t, std::string tableName,int columnIndex) {
+		this->columnIndex = columnIndex;
 		this->t = t;
 		bTree = new Btree<T>(t);
 		createFolder("bTreeData");
 		createBinFile("bTreeData", tableName);
-		for (int i = 0; i < names.size(); i++) {
-			for (int j = 0; j < names[i].size(); j++) {
-				bTree->insert(names[i][j], i);
-			}
-		}
+	}
+	void insert(const T& data, int blockNum) {
+		bTree->insert(data, blockNum);
+		//std::vector<uint8_t> bytes = bTree->getRoot()->MarshalNode();
+		//addToFileBytes("bTreeData/" + std::to_string(t) + ".bin", bytes);
 	}
 
 	int getBlockNum(T val) {
 		return bTree->getBlockNum(val);
+	}
+
+	int getColumnIndex() {
+		return columnIndex;
 	}
 
 

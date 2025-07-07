@@ -680,3 +680,255 @@ TEST(DataBaseTests, ManyTablesWithUniqueNames) {
     // Sprawdzamy czy wszystkie tabele zosta³y wczytane
 }
 */
+//-----------------Btree Tests ------------------
+
+// Test dodawania B-tree i sprawdzania numeru bloku dla istniej¹cego elementu
+TEST(DataBaseTests, AddBTreeAndGetBlockNum) {
+    std::string tableName = "bTreeTestTable";
+    Database db;
+
+    // Utwórz tabelê z kolumnami
+    db.addTable(tableName);
+    db.addColumn(tableName, "id", int32_tId, false);
+    db.addColumn(tableName, "name", stringId, false);
+    db.addColumn(tableName, "value", int64_tId, false);
+
+    // Dodaj rekordy, które wype³ni¹ przynajmniej dwa bloki
+    for (int i = 1; i <= 50; i++) {
+        std::string name = "Record-" + std::to_string(i);
+        db.addRecord(tableName, { i, name, (int64_t)(i * 100) });
+    }
+
+    // Dodaj wiêcej rekordów z d³u¿szymi ci¹gami znaków
+    for (int i = 51; i <= 100; i++) {
+        std::string name = "LongRecord-" + std::to_string(i) + std::string(500, 'X');
+        db.addRecord(tableName, { i, name, (int64_t)(i * 100) });
+    }
+
+    // Dodaj B-tree dla kolumny "name"
+    ASSERT_NO_THROW(db.addBtree(tableName, "name")) << "Dodanie B-tree zakoñczy³o siê b³êdem";
+
+    // SprawdŸ numery bloków
+    std::vector<int64_t> blockNums = db.getTableBlockNums(tableName);
+    ASSERT_GE(blockNums.size(), 2) << "Tabela powinna mieæ co najmniej 2 bloki";
+
+    // SprawdŸ czy getBlockNum zwraca prawid³owy numer bloku
+    int blockNum1 = db.getBlockNum(tableName, "name", std::string("Record-10"));
+    EXPECT_GE(blockNum1, 0) << "getBlockNum powinien zwróciæ prawid³owy numer bloku";
+
+    // SprawdŸ numer bloku dla elementu z drugiego bloku
+    std::string longRecordName = "LongRecord-75" + std::string(500, 'X');
+    int blockNum2 = db.getBlockNum(tableName, "name", longRecordName);
+    EXPECT_EQ(blockNum2, blockNums[1]) << "getBlockNum dla elementu z drugiego bloku powinien zwróciæ numer drugiego bloku";
+
+    // Wyczyœæ po teœcie
+    deleteFile(db.getPath() + "/" + tableName + ".bin");
+}
+
+// Test dodawania B-tree dla ró¿nych typów kolumn
+TEST(DataBaseTests, AddBTreeForDifferentColumnTypes) {
+    std::string tableName = "bTreeTypesTable";
+    Database db;
+
+    // Utwórz tabelê z kolumnami ró¿nych typów
+    db.addTable(tableName);
+    db.addColumn(tableName, "id", int32_tId, false);
+    db.addColumn(tableName, "name", stringId, false);
+    db.addColumn(tableName, "value", int64_tId, false);
+
+    // Dodaj kilka rekordów
+    for (int i = 1; i <= 20; i++) {
+        std::string name = "Test-" + std::to_string(i);
+        db.addRecord(tableName, { i, name, (int64_t)(i * 10) });
+    }
+
+    // Dodaj B-tree dla wszystkich kolumn
+    ASSERT_NO_THROW(db.addBtree(tableName, "id")) << "Dodanie B-tree dla kolumny int32_t zakoñczy³o siê b³êdem";
+    ASSERT_NO_THROW(db.addBtree(tableName, "name")) << "Dodanie B-tree dla kolumny string zakoñczy³o siê b³êdem";
+    ASSERT_NO_THROW(db.addBtree(tableName, "value")) << "Dodanie B-tree dla kolumny int64_t zakoñczy³o siê b³êdem";
+
+    // SprawdŸ czy getBlockNum dzia³a dla ró¿nych typów
+    int blockNumInt = db.getBlockNum(tableName, "id", 10);
+    int blockNumString = db.getBlockNum(tableName, "name", std::string("Test-10"));
+    int blockNumInt64 = db.getBlockNum(tableName, "value", (int64_t)100);
+
+    EXPECT_GE(blockNumInt, 0) << "getBlockNum dla int32_t powinien zwróciæ prawid³owy numer bloku";
+    EXPECT_GE(blockNumString, 0) << "getBlockNum dla string powinien zwróciæ prawid³owy numer bloku";
+    EXPECT_GE(blockNumInt64, 0) << "getBlockNum dla int64_t powinien zwróciæ prawid³owy numer bloku";
+
+    // Powinny wskazywaæ na ten sam blok, poniewa¿ te wartoœci s¹ w tym samym rekordzie
+    EXPECT_EQ(blockNumInt, blockNumString) << "Bloki dla ró¿nych kolumn tego samego rekordu powinny byæ identyczne";
+    EXPECT_EQ(blockNumString, blockNumInt64) << "Bloki dla ró¿nych kolumn tego samego rekordu powinny byæ identyczne";
+
+    // Wyczyœæ po teœcie
+    deleteFile(db.getPath() + "/" + tableName + ".bin");
+}
+
+// Test przypadku, gdy tabela ma co najmniej 3 bloki
+TEST(DataBaseTests, BTreeWithMultipleBlocks) {
+    std::string tableName = "threeBlocksTable";
+    Database db;
+
+    // Utwórz tabelê
+    db.addTable(tableName);
+    db.addColumn(tableName, "id", int32_tId, false);
+    db.addColumn(tableName, "name", stringId, false);
+
+    // Dodaj rekordy do pierwszego bloku
+    for (int i = 1; i <= 20; i++) {
+        std::string name = "FirstBlock-" + std::to_string(i) + std::string(200, 'A');
+        db.addRecord(tableName, { i, name });
+    }
+
+    // Dodaj rekordy do drugiego bloku
+    for (int i = 21; i <= 40; i++) {
+        std::string name = "SecondBlock-" + std::to_string(i) + std::string(200, 'B');
+        db.addRecord(tableName, { i, name });
+    }
+
+    // Dodaj rekordy do trzeciego bloku
+    std::string targetElement = "ThirdBlock-60" + std::string(200, 'C');
+    for (int i = 41; i <= 60; i++) {
+        std::string name = "ThirdBlock-" + std::to_string(i) + std::string(200, 'C');
+        db.addRecord(tableName, { i, name });
+    }
+
+    // SprawdŸ czy tabela ma przynajmniej 3 bloki
+    std::vector<int64_t> blockNums = db.getTableBlockNums(tableName);
+    ASSERT_GE(blockNums.size(), 3) << "Tabela powinna mieæ co najmniej 3 bloki";
+
+    // Dodaj B-tree dla kolumny "name"
+    ASSERT_NO_THROW(db.addBtree(tableName, "name")) << "Dodanie B-tree zakoñczy³o siê b³êdem";
+
+    // SprawdŸ numer bloku dla elementu z trzeciego bloku
+    int blockNum = db.getBlockNum(tableName, "name", targetElement);
+    EXPECT_EQ(blockNum, blockNums[2]) << "getBlockNum powinien zwróciæ numer trzeciego bloku dla elementu z trzeciego bloku";
+
+    // Wyczyœæ po teœcie
+    deleteFile(db.getPath() + "/" + tableName + ".bin");
+}
+
+// Test obs³ugi nieistniej¹cych kolumn i elementów
+TEST(DataBaseTests, BTreeWithNonExistentItems) {
+    std::string tableName = "nonExistentItemsTable";
+    Database db;
+
+    // Utwórz tabelê
+    db.addTable(tableName);
+    db.addColumn(tableName, "id", int32_tId, false);
+    db.addColumn(tableName, "name", stringId, false);
+
+    // Dodaj kilka rekordów
+    for (int i = 1; i <= 10; i++) {
+        std::string name = "Record-" + std::to_string(i);
+        db.addRecord(tableName, { i, name });
+    }
+
+    // Dodaj B-tree dla istniej¹cej kolumny
+    ASSERT_NO_THROW(db.addBtree(tableName, "name")) << "Dodanie B-tree dla istniej¹cej kolumny zakoñczy³o siê b³êdem";
+
+    // Spróbuj dodaæ B-tree dla nieistniej¹cej kolumny
+    EXPECT_NO_THROW(db.addBtree(tableName, "nonExistentColumn")) << "addBtree powinien bezpiecznie obs³u¿yæ nieistniej¹c¹ kolumnê";
+
+    // SprawdŸ getBlockNum dla istniej¹cego elementu
+    int blockNum1 = db.getBlockNum(tableName, "name", std::string("Record-5"));
+    EXPECT_GE(blockNum1, 0) << "getBlockNum powinien zwróciæ prawid³owy numer bloku dla istniej¹cego elementu";
+
+    // SprawdŸ getBlockNum dla nieistniej¹cego elementu
+    int blockNum2 = db.getBlockNum(tableName, "name", std::string("NonExistentRecord"));
+    // W zale¿noœci od implementacji mo¿e zwróciæ -1 lub inn¹ wartoœæ wskazuj¹c¹ na brak elementu
+
+    // SprawdŸ getBlockNum dla nieistniej¹cej kolumny
+    int blockNum3 = db.getBlockNum(tableName, "nonExistentColumn", std::string("Record-5"));
+    // W zale¿noœci od implementacji mo¿e zwróciæ -1 lub inn¹ wartoœæ wskazuj¹c¹ na brak kolumny
+
+    // Wyczyœæ po teœcie
+    deleteFile(db.getPath() + "/" + tableName + ".bin");
+}
+
+// Test wydajnoœci dla du¿ej liczby rekordów
+TEST(DataBaseTests, BTreePerformanceTest) {
+    std::string tableName = "performanceTable";
+    Database db;
+
+    // Utwórz tabelê
+    db.addTable(tableName);
+    db.addColumn(tableName, "id", int32_tId, false);
+    db.addColumn(tableName, "value", stringId, false);
+
+    const int RECORD_COUNT = 300; // Du¿a liczba rekordów
+
+    // Dodaj du¿¹ liczbê rekordów
+    for (int i = 0; i < RECORD_COUNT; i++) {
+        std::string value = "Value-" + std::to_string(i) + "-" + std::string(20, 'X');
+        db.addRecord(tableName, { i, value });
+    }
+
+    // Zmierz czas tworzenia B-tree
+    auto startCreate = std::chrono::high_resolution_clock::now();
+    db.addBtree(tableName, "value");
+    auto endCreate = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> createTime = endCreate - startCreate;
+
+    std::cout << "Czas tworzenia B-tree dla " << RECORD_COUNT << " rekordów: "
+        << createTime.count() << " sekund" << std::endl;
+
+    // Zmierz czas wyszukiwania
+    std::string searchValue = "Value-150-" + std::string(20, 'X');
+    auto startSearch = std::chrono::high_resolution_clock::now();
+    int blockNum = db.getBlockNum(tableName, "value", searchValue);
+    auto endSearch = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> searchTime = endSearch - startSearch;
+
+    std::cout << "Czas wyszukiwania elementu w B-tree: "
+        << searchTime.count() << " sekund" << std::endl;
+
+    EXPECT_GE(blockNum, 0) << "Nie znaleziono elementu w B-tree";
+    EXPECT_LT(searchTime.count(), 0.01) << "Wyszukiwanie w B-tree powinno byæ szybkie (poni¿ej 10ms)";
+
+    // Wyczyœæ po teœcie
+    deleteFile(db.getPath() + "/" + tableName + ".bin");
+}
+
+// Test zachowania B-tree po zapisaniu i ponownym wczytaniu bazy danych
+TEST(DataBaseTests, BTreePersistenceTest) {
+    std::string tableName = "persistenceTable";
+
+    // Utwórz bazê danych, dodaj tabele, kolumny, rekordy i B-tree
+    {
+        Database db;
+        db.addTable(tableName);
+        db.addColumn(tableName, "id", int32_tId, false);
+        db.addColumn(tableName, "name", stringId, false);
+
+        for (int i = 1; i <= 20; i++) {
+            std::string name = "Record-" + std::to_string(i);
+            db.addRecord(tableName, { i, name });
+        }
+
+        // Dodaj B-tree i sprawdŸ numer bloku
+        db.addBtree(tableName, "name");
+        int originalBlockNum = db.getBlockNum(tableName, "name", std::string("Record-10"));
+        EXPECT_GE(originalBlockNum, 0) << "Nie uda³o siê znaleŸæ elementu w B-tree";
+
+        // Zapisz bazê danych
+        db.commit();
+    }
+
+    // Wczytaj bazê danych ponownie i sprawdŸ czy B-tree dzia³a
+    {
+        Database db;
+        db.loadDataBase();
+
+        // Ponownie dodaj B-tree, poniewa¿ indeksy B-tree mog¹ nie byæ zapisywane
+        db.addBtree(tableName, "name");
+
+        // SprawdŸ czy getBlockNum zwraca prawid³owy numer bloku
+        int newBlockNum = db.getBlockNum(tableName, "name", std::string("Record-10"));
+        EXPECT_GE(newBlockNum, 0) << "Nie uda³o siê znaleŸæ elementu w B-tree po ponownym wczytaniu";
+    }
+
+    // Wyczyœæ po teœcie
+    deleteFile(Database().getPath() + "/" + tableName + ".bin");
+}
+

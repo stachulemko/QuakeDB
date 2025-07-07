@@ -12,6 +12,7 @@
 #include "wal.h"
 #include "dataBlock.h"
 #include "bTreeManager.h"
+#include "simpleOperations.h"
 
 class Table {
 private:
@@ -35,6 +36,10 @@ public:
 
     void setBlockBefore(int32_t blockNum) {
         blockBefore = blockNum;
+    }
+
+    int getDataBlocksSize() {
+        return dataBlocks.size();
     }
 
     std::string getTableName() const;
@@ -63,6 +68,14 @@ public:
 	}
     */
 
+    void showDataBlockRecord() {
+        for (int i = 0; i < dataBlocks.size(); i++) {
+            std::cout << "##################################<" << std::endl;
+            showVariantVectorOfVector(dataBlocks[i].getRecords());
+            std::cout << "##################################<" << std::endl;
+        }
+    }
+
     void clearAll();
     
     //std::vector<uint8_t>getColumnDefinition();
@@ -88,6 +101,51 @@ public:
     //std::vector<DataBlock> getBlocks() {
 	//	return dataBlocks;
     //}
+
+    void addBtree(std::string columnName) {
+        for (int i = 0; i < dataBlocks.size(); i++) {
+            for (int w = 0; w < dataBlocks.size(); w++) {
+                std::cout << w << " " << dataBlocks[w].getBlockNum() << std::endl;
+            }
+            if (dataBlocks[i].ifColumnExists(columnName)) {
+                int index = dataBlocks[i].getColumnIndex(columnName);
+                // Tworzymy wektor par <allVars, int>
+                //std::vector<std::pair<allVars, int>> namesVector;
+                // Dodajemy parê (columnName przekonwertowane na allVars, numer bloku)
+                //namesVector.push_back({ columnName, static_cast<int>(dataBlocks[i].getBlockNum()) });
+                BtreeManager<allVars>* bTreeManager = new BtreeManager<allVars>(3, tableName, index);
+                for (int j = 0; j < dataBlocks.size(); j++) {
+                    std::vector<allVars> columnValues;
+					columnValues = dataBlocks[j].getColumnValues(columnName);
+                    /*
+                    std::cout << "--------------" << std::endl;
+                    for (int i = 0; i < columnValues.size(); i++) {
+                        showVariantVariable(columnValues[i]);
+                    }
+                    std::cout << "--------------" << std::endl;
+                    */
+					for (int k = 0; k < columnValues.size(); k++) {
+						bTreeManager->insert(columnValues[k], dataBlocks[j].getBlockNum());
+					}
+                }
+                bTreeManagers.push_back(bTreeManager);
+                //bTreeManager->createBtree();
+                break;
+            }
+        }
+    }
+    int getBlockNum(std::string columnName, allVars data) {
+        for (int i = 0; i < dataBlocks.size(); i++) {
+            if (dataBlocks[i].ifColumnExists(columnName)) {
+                for (int j = 0; j < bTreeManagers.size(); j++) {
+                    if (bTreeManagers[j]->getColumnIndex() == dataBlocks[i].getColumnIndex(columnName)) {
+						return bTreeManagers[j]->getBlockNum(data);
+                    }
+                }
+                
+            }
+        }
+    }
 };
 
 #endif 

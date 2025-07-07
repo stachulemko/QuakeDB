@@ -297,3 +297,168 @@ TEST(TableTests, DifferentPaths) {
     EXPECT_EQ(table3.getTableName(), "pathTest3");
 }
 
+//-------- bTree module tests
+
+TEST(TableTests, AddBTreeAndGetBlockNum) {
+    // Utworzenie obiektu Wal
+    Wal* wal = new Wal();
+    wal->createDirectoryAndFile();
+
+    // Utworzenie tabeli
+    Table table("testBTreeTable", ".", wal);
+
+    // Dodanie kolumn - zmieniono float64Id na int64_tId
+    table.addColumn("id", int32_tId, false);
+    table.addColumn("name", stringId, false);
+    table.addColumn("value", int64_tId, false);
+
+    const int NUM_COLUMNS = 100;
+    for (int i = 0; i < NUM_COLUMNS; i++) {
+        std::string longColName = "column" + std::to_string(i) + std::string(500, 'X');
+        table.addColumn(longColName, i % 3 + 1, i % 2 == 0);
+		std::cout << "Dodano kolumnê: " << longColName << std::endl;
+        //table.addColumn(tableName, longColName, i % 3 + 1, i % 2 == 0);
+    }
+    table.addBtree("name");
+	table.getBlockNum("name", std::string("TestName"));
+}
+
+
+
+// Test sprawdzaj¹cy dzia³anie addBtree dla nieistniej¹cej kolumny
+TEST(TableTests, AddBTreeForNonExistentColumn) {
+    Wal* wal = new Wal();
+    wal->createDirectoryAndFile();
+
+    Table table("testNonExistentColumn", ".", wal);
+
+    // Dodajemy kolumnê "id"
+    table.addColumn("id", int32_tId, false);
+
+    // Próba dodania B-tree dla nieistniej¹cej kolumny
+    testing::internal::CaptureStdout(); // Przechwytujemy wyjœcie konsoli
+    table.addBtree("nonexistent");
+    std::string output = testing::internal::GetCapturedStdout();
+
+    // Sprawdzamy czy funkcja getBlockNum zwróci sensown¹ wartoœæ dla nieistniej¹cego indeksu
+    // W zale¿noœci od implementacji mo¿e zwróciæ 0, -1 lub rzuciæ wyj¹tek
+    try {
+        int blockNum = table.getBlockNum("nonexistent", "someValue");
+        // Jeœli nie rzuci wyj¹tku, oczekujemy jakiejœ domyœlnej wartoœci
+        EXPECT_TRUE(blockNum == 0 || blockNum == -1) << "Dla nieistniej¹cej kolumny getBlockNum powinien zwróciæ domyœln¹ wartoœæ";
+    }
+    catch (const std::exception& e) {
+        // Jeœli rzuci wyj¹tek, to równie¿ akceptujemy
+        SUCCEED() << "Funkcja getBlockNum rzuci³a wyj¹tek dla nieistniej¹cej kolumny: " << e.what();
+    }
+
+    delete wal;
+}
+
+// Test sprawdzaj¹cy dzia³anie getBlockNum dla ró¿nych typów danych
+TEST(TableTests, GetBlockNumForDifferentTypes) {
+    Wal* wal = new Wal();
+    wal->createDirectoryAndFile();
+
+    Table table("testMultipleTypes", ".", wal);
+
+    // Dodanie kolumn ró¿nych typów - zmieniono float64Id na int64_tId
+    table.addColumn("id", int32_tId, false);
+    table.addColumn("name", stringId, false);
+    table.addColumn("value", int64_tId, false);
+
+    // Dodanie rekordów
+    for (int i = 1; i <= 30; i++) {
+        std::string name = "Record-" + std::to_string(i);
+        table.addRecord({ i, name, (int64_t)(i * 100) });  // Zmieniono typ wartoœci na int64_t
+    }
+
+    // Dodanie indeksu B-tree dla wszystkich kolumn
+    table.addBtree("id");
+    table.addBtree("name");
+    table.addBtree("value");
+
+    // Sprawdzenie getBlockNum dla wartoœci ró¿nych typów
+    int intBlockNum = table.getBlockNum("id", 15);
+    int stringBlockNum = table.getBlockNum("name", std::string("Record-15"));
+    int doubleBlockNum = table.getBlockNum("value", (int64_t)(15 * 100));  // Zmieniono typ wartoœci na int64_t
+
+    // Powinny wszystkie wskazywaæ na ten sam blok, poniewa¿ rekord jest tylko jeden
+    EXPECT_EQ(intBlockNum, stringBlockNum) << "getBlockNum powinien zwróciæ ten sam numer bloku dla ró¿nych kolumn tego samego rekordu";
+    EXPECT_EQ(stringBlockNum, doubleBlockNum) << "getBlockNum powinien zwróciæ ten sam numer bloku dla ró¿nych kolumn tego samego rekordu";
+
+    delete wal;
+}
+
+// Test sprawdzaj¹cy odpornoœæ na ekstremalne przypadki
+TEST(TableTests, BTreeEdgeCases) {
+    Wal* wal = new Wal();
+    wal->createDirectoryAndFile();
+
+    Table table("testEdgeCases", ".", wal);
+
+    // Dodanie kolumn
+    table.addColumn("id", int32_tId, false);
+    table.addColumn("name", stringId, false);
+
+    // Test pustej tabeli
+    ASSERT_NO_THROW(table.addBtree("id")) << "addBtree powinien obs³ugiwaæ pust¹ tabelê";
+
+    // Dodanie pojedynczego rekordu
+    table.addRecord({ 1, "SingleRecord" });
+
+    // Dodanie B-tree dla kolumny z jednym rekordem
+    ASSERT_NO_THROW(table.addBtree("name")) << "addBtree powinien obs³ugiwaæ tabelê z pojedynczym rekordem";
+
+    // Sprawdzenie getBlockNum dla istniej¹cego elementu
+    int blockNum = table.getBlockNum("name", std::string("SingleRecord"));
+    EXPECT_GE(blockNum, 0) << "getBlockNum powinien zwróciæ prawid³owy numer bloku dla istniej¹cego elementu";
+
+    // Sprawdzenie getBlockNum dla nieistniej¹cego elementu
+    int nonExistentBlockNum = table.getBlockNum("name", std::string("NonExistent"));
+    // W zale¿noœci od implementacji mo¿e zwróciæ 0, -1 lub inn¹ wartoœæ wskazuj¹c¹ na brak elementu
+
+    delete wal;
+}
+
+// Test sprawdzaj¹cy wydajnoœæ dla du¿ych iloœci danych
+TEST(TableTests, BTreePerformance) {
+    Wal* wal = new Wal();
+    wal->createDirectoryAndFile();
+
+    Table table("testPerformance", ".", wal);
+
+    // Dodanie kolumn
+    table.addColumn("id", int32_tId, false);
+    table.addColumn("value", stringId, false);
+
+    const int RECORD_COUNT = 500; // Du¿a liczba rekordów
+
+    // Dodanie rekordów
+    for (int i = 0; i < RECORD_COUNT; i++) {
+        std::string value = "Value-" + std::to_string(i) + "-" + std::string(20, 'X');
+        table.addRecord({ i, value });
+    }
+
+    // Zmierzenie czasu tworzenia B-tree
+    auto startCreate = std::chrono::high_resolution_clock::now();
+    table.addBtree("value");
+    auto endCreate = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> createTime = endCreate - startCreate;
+
+    std::cout << "Czas tworzenia B-tree dla " << RECORD_COUNT << " rekordów: "
+        << createTime.count() << " sekund" << std::endl;
+
+    // Zmierzenie czasu wyszukiwania
+    auto startSearch = std::chrono::high_resolution_clock::now();
+    int blockNum = table.getBlockNum("value", std::string("Value-250-XXXXXXXXXXXXXXXXXXXX"));
+    auto endSearch = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> searchTime = endSearch - startSearch;
+
+    std::cout << "Czas wyszukiwania w B-tree: " << searchTime.count() << " sekund" << std::endl;
+
+    // Sprawdzamy czy wyszukiwanie by³o szybkie (poni¿ej 1ms)
+    EXPECT_LT(searchTime.count(), 0.001) << "Wyszukiwanie w B-tree powinno byæ szybkie";
+
+    delete wal;
+}
