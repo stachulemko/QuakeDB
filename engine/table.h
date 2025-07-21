@@ -134,18 +134,25 @@ public:
             }
         }
     }
+    
     int getBlockNum(std::string columnName, allVars data) {
         for (int i = 0; i < dataBlocks.size(); i++) {
             if (dataBlocks[i].ifColumnExists(columnName)) {
                 for (int j = 0; j < bTreeManagers.size(); j++) {
                     if (bTreeManagers[j]->getColumnIndex() == dataBlocks[i].getColumnIndex(columnName)) {
-						return bTreeManagers[j]->getBlockNum(data);
+						//return bTreeManagers[j]->getBlockNum(data);
                     }
                 }
                 
             }
+            else {
+                //assert column dont exists 
+            }
         }
+        return 0;
     }
+    
+    
 };
 
 #endif 

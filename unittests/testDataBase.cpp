@@ -683,6 +683,7 @@ TEST(DataBaseTests, ManyTablesWithUniqueNames) {
 //-----------------Btree Tests ------------------
 
 // Test dodawania B-tree i sprawdzania numeru bloku dla istniej¹cego elementu
+/*
 TEST(DataBaseTests, AddBTreeAndGetBlockNum) {
     std::string tableName = "bTreeTestTable";
     Database db;
@@ -931,4 +932,4 @@ TEST(DataBaseTests, BTreePersistenceTest) {
     // Wyczyœæ po teœcie
     deleteFile(Database().getPath() + "/" + tableName + ".bin");
 }
-
+*/

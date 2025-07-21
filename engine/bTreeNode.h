@@ -10,8 +10,8 @@
 template <typename T>
 class BtreeNode {
 private:
-    // int - block num , VarType - data
-    std::vector<std::pair<int, T>> names;
+    // int - klucz, std::vector<int> - numery bloków dla danego klucza
+    std::vector<std::pair<T, std::vector<int>>> names;
     std::vector<BtreeNode<T>*> childrens;
     int t;
 
@@ -20,7 +20,7 @@ public:
         this->t = t;
     }
 
-    std::vector<std::pair<int, T>> getNames() {
+    std::vector<std::pair<T, std::vector<int>>> getNames() {
         return names;
     }
 
@@ -38,7 +38,7 @@ public:
     }
 
     T getName() {
-        return names[0].second;
+        return names[0].first;
     }
 
     void addChildAtPos(int i, BtreeNode<T>* child) {
@@ -50,9 +50,20 @@ public:
     }
 
     void addName(T name, int dataBlock) {
-        names.push_back({ dataBlock, name });
-        std::sort(names.begin(), names.end(), [](const std::pair<int, T>& a, const std::pair<int, T>& b) {
-            return a.second < b.second;
+        bool isAlready = false;
+        for (size_t i = 0; i < names.size(); i++) {
+            if (names[i].first == name) {
+                isAlready = true;
+                names[i].second.push_back(dataBlock);
+                break;
+            }
+        }
+        if (isAlready == false) {
+            std::vector<int> blocks = { dataBlock };
+            names.push_back({ name, blocks });
+        }
+        std::sort(names.begin(), names.end(), [](const std::pair<T, std::vector<int>>& a, const std::pair<T, std::vector<int>>& b) {
+            return a.first < b.first;
             });
     }
 
@@ -60,19 +71,21 @@ public:
         traverse(path, root, data, blockNum);
     }
 
-    std::pair<int, T> splitNode(BtreeNode<T>* node, std::vector<BtreeNode<T>*> path, BtreeNode<T>*& root) {
+    std::pair<T, std::vector<int>> splitNode(BtreeNode<T>* node, std::vector<BtreeNode<T>*> path, BtreeNode<T>*& root) {
         BtreeNode<T>* b1 = new BtreeNode<T>(t);
         BtreeNode<T>* b2 = new BtreeNode<T>(t);
-        std::vector<std::pair<int, T>> tmpNames = node->getNames();
+        std::vector<std::pair<T, std::vector<int>>> tmpNames = node->getNames();
 
         for (size_t i = 0; i < node->getNames().size(); i++) {
             if (i < node->getNames().size() / 2) {
-                b1->addName(tmpNames[i].second, tmpNames[i].first);
-                //std::cout << "Adding to b1: " << tmpNames[i].second << std::endl;
+                for (int blockNum : tmpNames[i].second) {
+                    b1->addName(tmpNames[i].first, blockNum);
+                }
             }
             else if (i > node->getNames().size() / 2) {
-                b2->addName(tmpNames[i].second, tmpNames[i].first);
-                //std::cout << "Adding to b2: " << tmpNames[i].second << std::endl;
+                for (int blockNum : tmpNames[i].second) {
+                    b2->addName(tmpNames[i].first, blockNum);
+                }
             }
         }
 
@@ -90,7 +103,13 @@ public:
         }
 
         BtreeNode<T>* middle = new BtreeNode<T>(t);
-        middle->addName(tmpNames[node->getNames().size() / 2].second, tmpNames[node->getNames().size() / 2].first);
+        T middleValue = tmpNames[node->getNames().size() / 2].first;
+        std::vector<int> middleBlocks = tmpNames[node->getNames().size() / 2].second;
+
+        for (int blockNum : middleBlocks) {
+            middle->addName(middleValue, blockNum);
+        }
+
         middle->addChild(b1);
         middle->addChild(b2);
 
@@ -109,10 +128,7 @@ public:
             root = middle;
         }
 
-        T middleValue = tmpNames[node->getNames().size() / 2].second;
-        int blockData = tmpNames[node->getNames().size() / 2].first;
-
-        return { blockData, middleValue };
+        return { middleValue, middleBlocks };
     }
 
     void traverse(std::vector<BtreeNode<T>*> path, BtreeNode<T>*& root, T data, int blockData) {
@@ -122,11 +138,12 @@ public:
 
         path[path.size() - 1]->addName(data, blockData);
 
-        if (path[path.size() - 1]->getNames().size() >= t) {
-            std::pair<int, T> newData = splitNode(path[path.size() - 1], path, root);
+        if (path[path.size() - 1]->getNames().size() >= static_cast<size_t>(t)) {
+            std::pair<T, std::vector<int>> newData = splitNode(path[path.size() - 1], path, root);
             path.pop_back();
             if (!path.empty()) {
-                traverse(path, root, newData.second, newData.first);
+                // U¿yj tylko pierwszego bloku z kolekcji bloków do propagacji w górê
+                traverse(path, root, newData.first, newData.second[0]);
             }
         }
     }

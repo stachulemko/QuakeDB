@@ -14,7 +14,7 @@ bool isGreater(const T& a, const T& b) {
 
 template<typename T>
 bool isEqual(const T& a, const T& b) {
-	return a == b;
+    return a == b;
 }
 
 template <typename T>
@@ -35,25 +35,36 @@ public:
 
         while (!tmp->getChildrens().empty()) {
             bool moved = false;
+            bool finded = false;
             for (size_t i = 0; i < tmp->getNames().size(); ++i) {
-                if (!isGreater(data, tmp->getNames()[i].second)) {
+                if (isEqual(data, tmp->getNames()[i].first)) {
+                    //path.push_back(tmp);
+                    finded = true;
+                    break;
+                }
+                if (!isGreater(data, tmp->getNames()[i].first)) {
                     path.push_back(tmp);
                     tmp = tmp->getChildrens()[i];
                     moved = true;
                     break;
                 }
             }
+            if (finded) {
+                break;
+            }
             if (!moved) {
                 path.push_back(tmp);
                 tmp = tmp->getChildrens()[tmp->getChildrens().size() - 1];
             }
+            
         }
+        //if()
 
         path.push_back(tmp);
         tmp->insert(data, blocNum, path, root);
     }
 
-    std::vector<std::pair<int, T>> getRootNames() {
+    std::vector<std::pair<T, std::vector<int>>> getRootNames() {
         return root->getNames();
     }
 
@@ -61,33 +72,49 @@ public:
         return root;
     }
 
-
-    int getBlockNum(T val) {
+    std::vector<int> getBlockNum(T val) {
+        std::vector<int> blockNum;
         BtreeNode<T>* tmp = root;
+
         while (!tmp->getChildrens().empty()) {
             bool moved = false;
-            for (size_t i = 0; i < tmp->getNames().size(); ++i) {
-                if (!isGreater(val, tmp->getNames()[i].second) && !isEqual(val, tmp->getNames()[i].second)) {
+
+            // Sprawdź klucze w bieżącym węźle
+            for (size_t i = 0; i < tmp->getNames().size(); i++) {
+                // Sprawdź czy klucz jest równy szukanej wartości
+                if (isEqual(val, tmp->getNames()[i].first)) {
+                    // Dodaj wszystkie numery bloków dla tego klucza
+                    for (const auto& block : tmp->getNames()[i].second) {
+                        blockNum.push_back(block);
+                    }
+                }
+
+                // Przejdź do odpowiedniego dziecka, jeśli wartość jest mniejsza
+                if (!isGreater(val, tmp->getNames()[i].first) && !isEqual(val, tmp->getNames()[i].first)) {
                     tmp = tmp->getChildrens()[i];
                     moved = true;
                     break;
                 }
-                else if (isEqual(val, tmp->getNames()[i].second)) {
-					return tmp->getNames()[i].first;
-                }
             }
+
+            // Jeśli nie przesunięto się do żadnego dziecka, idź do ostatniego dziecka
             if (!moved) {
-                //path.push_back(tmp);
                 tmp = tmp->getChildrens()[tmp->getChildrens().size() - 1];
             }
-            /*
-            if (!moved) {
-                //path.push_back(tmp);
-                //tmp = tmp->getChildrens()[tmp->getChildrens().size() - 1];
-            }
-            */
         }
+
+        // Sprawdź klucze w liściu
+        for (size_t i = 0; i < tmp->getNames().size(); i++) {
+            if (isEqual(val, tmp->getNames()[i].first)) {
+                for (int j = 0; j < tmp->getNames()[i].second.size(); j++) {
+                    blockNum.push_back(tmp->getNames()[i].second[j]);
+                }
+            }
+        }
+
+        return blockNum;
     }
+
     void printTree(BtreeNode<T>* node, const std::string& prefix = "", bool isLast = true) {
         if (node == nullptr) return;
 
@@ -98,7 +125,7 @@ public:
         // Wyświetl zawartość węzła
         std::cout << "[";
         for (const auto& name : node->getNames()) {
-            std::cout << " " << name.second;
+            std::cout << " " << name.first;
         }
         std::cout << " ]" << std::endl;
 
@@ -112,6 +139,4 @@ public:
     }
 };
 
-
 #endif
-

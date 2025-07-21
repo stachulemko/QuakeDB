@@ -21,6 +21,8 @@ private:
     std::vector<std::vector<allVars>> sqlQueryBytes;
     std::vector<std::vector<allVars>> AllTableBytes;
 	bool selectAcomplished = false;
+    //Table* selectTable = nullptr;
+
 public:
     Database();
 

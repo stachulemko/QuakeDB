@@ -74,6 +74,7 @@ Database &Database::select(std::string tableName, std::vector<std::string> colum
     for (int i = 0; i < tables.size(); i++) {
         if (tables[i]->getTableName() == tableName) {
             AllTableBytes = tables[i]->getTableDefinition();
+			//selectTable = tables[i]->get
             std::cout << "0000000000000000000000" << std::endl;
             //showVariantVectorOfVector(AllTableBytes);
             std::cout << "0000000000000000000000" << std::endl;
