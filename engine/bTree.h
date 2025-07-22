@@ -75,18 +75,25 @@ public:
     std::vector<int> getBlockNum(T val) {
         std::vector<int> blockNum;
         BtreeNode<T>* tmp = root;
-
+        bool goOut = false;
         while (!tmp->getChildrens().empty()) {
             bool moved = false;
-
+            goOut = false;
             // Sprawdź klucze w bieżącym węźle
             for (size_t i = 0; i < tmp->getNames().size(); i++) {
                 // Sprawdź czy klucz jest równy szukanej wartości
                 if (isEqual(val, tmp->getNames()[i].first)) {
                     // Dodaj wszystkie numery bloków dla tego klucza
+                    for (int j = 0; j < tmp->getNames()[i].second.size(); j++) {
+                        blockNum.push_back(tmp->getNames()[i].second[j]);
+                    }
+                    goOut = true;
+                    break;
+                    /*
                     for (const auto& block : tmp->getNames()[i].second) {
                         blockNum.push_back(block);
                     }
+                    */
                 }
 
                 // Przejdź do odpowiedniego dziecka, jeśli wartość jest mniejsza
@@ -96,7 +103,9 @@ public:
                     break;
                 }
             }
-
+            if (goOut) {
+                break;
+            }
             // Jeśli nie przesunięto się do żadnego dziecka, idź do ostatniego dziecka
             if (!moved) {
                 tmp = tmp->getChildrens()[tmp->getChildrens().size() - 1];
@@ -104,14 +113,15 @@ public:
         }
 
         // Sprawdź klucze w liściu
-        for (size_t i = 0; i < tmp->getNames().size(); i++) {
-            if (isEqual(val, tmp->getNames()[i].first)) {
-                for (int j = 0; j < tmp->getNames()[i].second.size(); j++) {
-                    blockNum.push_back(tmp->getNames()[i].second[j]);
+        if (!goOut) {
+            for (size_t i = 0; i < tmp->getNames().size(); i++) {
+                if (isEqual(val, tmp->getNames()[i].first)) {
+                    for (int j = 0; j < tmp->getNames()[i].second.size(); j++) {
+                        blockNum.push_back(tmp->getNames()[i].second[j]);
+                    }
                 }
             }
         }
-
         return blockNum;
     }
 
