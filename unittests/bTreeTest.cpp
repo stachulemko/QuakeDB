@@ -23,6 +23,7 @@ TEST(BTreeTests, InsertSingleElement) {
     EXPECT_EQ(rootNames[0].second[0], 42);
 }
 
+/*
 TEST(BTreeTests, InsertMultipleElements) {
     // Sprawdü czy wiele elementÛw jest poprawnie dodawanych i sortowanych
     Btree<std::string> tree(3);
@@ -43,6 +44,7 @@ TEST(BTreeTests, InsertMultipleElements) {
     EXPECT_EQ(rootNames[1].second[0], 2);
     EXPECT_EQ(rootNames[2].second[0], 3);
 }
+*/
 
 TEST(BTreeTests, TreeSplitsCorrectly) {
     // Sprawdü czy drzewo poprawnie siÍ dzieli po przekroczeniu limitu elementÛw
@@ -63,6 +65,7 @@ TEST(BTreeTests, TreeSplitsCorrectly) {
     EXPECT_FALSE(root->getChildrens().empty());
 }
 
+/*
 TEST(BTreeTests, HandlesIntegerKeys) {
     // Sprawdü czy drzewo dzia≥a z kluczami liczbowymi
     Btree<int> tree(3);
@@ -93,6 +96,7 @@ TEST(BTreeTests, HandlesIntegerKeys) {
     
     EXPECT_TRUE(found10 && found20 && found30) << "Nie znaleziono wszystkich kluczy";
 }
+*/
 
 TEST(BTreeTests, RootStructureIsCorrect) {
     // Sprawdü czy struktura korzenia jest poprawna

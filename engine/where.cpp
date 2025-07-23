@@ -11,7 +11,6 @@ std::vector<std::vector<allVars>> whereFunc(std::vector<std::vector<allVars>> Al
 			std::get<std::string>(AllTableData[0][i]) == columnName) {
 			columnIndex = i;
 		}
-
 	}
 	if (columnIndex == -1) {
 		std::cerr << "Error: Column '" << columnName << "' not found in the last state." << std::endl;

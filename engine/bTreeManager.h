@@ -26,9 +26,9 @@ public:
 		//addToFileBytes("bTreeData/" + std::to_string(t) + ".bin", bytes);
 	}
 
-	//int getBlockNum(T val) {
-	//	//return bTree->getBlockNum(val);
-	//}
+	std::vector<int> getBlockNum(T val) {
+		return bTree->getBlockNum(val);
+	}
 
 	int getColumnIndex() {
 		return columnIndex;

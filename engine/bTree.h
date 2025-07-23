@@ -125,21 +125,56 @@ public:
         return blockNum;
     }
 
+
+    /*
+    std::vector<int> getBlockNumByOperator(T val, std::string op) {
+        std::vector<int> blockNum;
+
+        auto compareByOperator = [&](const T& nodeVal) -> bool {
+            if (op == "<") return !isGreater(val, nodeVal) && !isEqual(val, nodeVal);
+            if (op == "<=") return !isGreater(val, nodeVal);
+            if (op == ">") return isGreater(nodeVal, val);
+            if (op == ">=") return isGreater(nodeVal, val) || isEqual(val, nodeVal);
+            if (op == "!=") return !isEqual(val, nodeVal);
+            return false; 
+            };
+
+        std::function<void(BtreeNode<T>*)> search = [&](BtreeNode<T>* node) {
+            if (!node) return;
+
+            for (size_t i = 0; i < node->getNames().size(); i++) {
+                if (compareByOperator(node->getNames()[i].first)) {
+                    for (const auto& blockId : node->getNames()[i].second) {
+                        blockNum.push_back(blockId);
+                    }
+                }
+            }
+
+
+            if (op == "<" || op == "<=" || op == "!=" || op == ">" || op == ">=") {
+                for (auto& child : node->getChildrens()) {
+                    search(child);
+                }
+            }
+
+        search(root);
+
+        return blockNum;
+    }
+    */
+
     void printTree(BtreeNode<T>* node, const std::string& prefix = "", bool isLast = true) {
         if (node == nullptr) return;
 
-        // Wyświetl węzeł
         std::cout << prefix;
         std::cout << (isLast ? "└── " : "├── ");
 
-        // Wyświetl zawartość węzła
         std::cout << "[";
         for (const auto& name : node->getNames()) {
             std::cout << " " << name.first;
         }
         std::cout << " ]" << std::endl;
 
-        // Wyświetl dzieci
         auto children = node->getChildrens();
         for (size_t i = 0; i < children.size(); ++i) {
             std::string newPrefix = prefix + (isLast ? "    " : "│   ");

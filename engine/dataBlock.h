@@ -64,6 +64,7 @@ public:
                 return i;
             }
         }
+        return -1;
     }
 
     std::vector<allVars> getColumnValues(std::string columnName) {

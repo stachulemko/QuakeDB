@@ -67,7 +67,8 @@ void Database::showFile() {
 
 Database &Database::select(std::string tableName, std::vector<std::string> columnNames) {
     //showSelect(tables, tableName, columnNames);
-
+    tmpTableName = tableName;
+	tmpColumnNames = columnNames;
 	selectAcomplished = true;
     sqlQueryBytes.clear();
     AllTableBytes.clear();
@@ -86,14 +87,21 @@ Database &Database::select(std::string tableName, std::vector<std::string> colum
 }
 
 Database &Database::where(std::string columnName, std::string mathOperator, allVars ifValue) {
-	if (selectAcomplished) {
-        sqlQueryBytes = whereFunc(AllTableBytes,sqlQueryBytes, columnName, mathOperator, ifValue);
-	}
-	else 
-    {
-		std::cerr << "Select must be called before where." << std::endl;
-	}
-	return *this;
+    if (mathOperator == "=" and ifBtreeColumnExists(tmpTableName,columnName) == true) {
+        sqlQueryBytes = getByIndex(tmpTableName, columnName, tmpColumnNames, ifValue);
+    }
+    else {
+        if (selectAcomplished) {
+            sqlQueryBytes = whereFunc(AllTableBytes, sqlQueryBytes, columnName, mathOperator, ifValue);
+        }
+        else
+        {
+            std::cerr << "Select must be called before where." << std::endl;
+        }
+        return *this;
+    }
+
+	
 }
 
 Database& Database::showSqQuery() {

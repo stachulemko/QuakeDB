@@ -3,8 +3,268 @@
 #include "wal.h"
 
 // Resetuje przechwytywanie stdout aby unikn¹æ b³êdu "Only one stdout capturer can exist at a time"
+
 void ResetStdoutCapture() {
     testing::internal::GetCapturedStdout();
+}
+
+
+// Pomocnicza funkcja do sprawdzania, czy wektor zawiera rekord o okreœlonych wartoœciach
+bool containsRecord(const std::vector<std::vector<allVars>>& records, const std::vector<allVars>& record) {
+    for (const auto& r : records) {
+        if (r.size() != record.size()) continue;
+
+        bool match = true;
+        for (size_t i = 0; i < r.size(); i++) {
+            if (r[i] != record[i]) {
+                match = false;
+                break;
+            }
+        }
+        if (match) return true;
+    }
+    return false;
+}
+
+TEST(TableTests, GetRowsByBtreeBasicTest) {
+    // Utwórz tabelê z prostym schematem
+    Wal* wal = new Wal();
+    wal->createDirectoryAndFile();
+    Table table("testGetRowsTable", ".", wal);
+
+    // Dodaj kolumny
+    table.addColumn("id", int32_tId, false);
+    table.addColumn("name", stringId, false);
+    table.addColumn("value", int64_tId, false);
+
+    // Dodaj rekordy
+    table.addRecord({ 1, std::string("Record1"), (int64_t)100 });
+    table.addRecord({ 2, std::string("Record2"), (int64_t)200 });
+    table.addRecord({ 3, std::string("Record3"), (int64_t)300 });
+    table.addRecord({ 4, std::string("Record2"), (int64_t)400 }); // Duplikat nazwy "Record2"
+
+    // Dodaj indeks B-tree dla kolumny "name"
+    table.addBtree("name");
+
+    // Wyszukaj rekordy po nazwie "Record2"
+    std::vector<std::vector<allVars>> result = table.getRowsByBtree("name", std::string("Record2"));
+
+    // SprawdŸ czy znaleziono dok³adnie 2 rekordy
+    ASSERT_EQ(result.size(), 2) << "Powinny zostaæ znalezione 2 rekordy z nazw¹ 'Record2'";
+
+    // SprawdŸ czy znalezione rekordy maj¹ odpowiednie wartoœci
+    EXPECT_TRUE(containsRecord(result, { 2, std::string("Record2"), (int64_t)200 }))
+        << "Nie znaleziono rekordu {2, 'Record2', 200}";
+    EXPECT_TRUE(containsRecord(result, { 4, std::string("Record2"), (int64_t)400 }))
+        << "Nie znaleziono rekordu {4, 'Record2', 400}";
+
+    delete wal;
+}
+
+TEST(TableTests, GetRowsByBtreeWithIntegerKey) {
+    // Test z kluczem typu int32_t
+    Wal* wal = new Wal();
+    wal->createDirectoryAndFile();
+    Table table("testIntKeyTable", ".", wal);
+
+    // Dodaj kolumny
+    table.addColumn("id", int32_tId, false);
+    table.addColumn("category", int32_tId, false);
+    table.addColumn("name", stringId, false);
+
+    // Dodaj rekordy - niektóre z t¹ sam¹ kategori¹
+    table.addRecord({ 1, 10, std::string("Item1") });
+    table.addRecord({ 2, 20, std::string("Item2") });
+    table.addRecord({ 3, 10, std::string("Item3") }); // Ta sama kategoria co Item1
+    table.addRecord({ 4, 30, std::string("Item4") });
+    table.addRecord({ 5, 10, std::string("Item5") }); // Ta sama kategoria co Item1 i Item3
+
+    // Dodaj indeks B-tree dla kolumny "category"
+    table.addBtree("category");
+
+    // Wyszukaj rekordy po kategorii 10
+    std::vector<std::vector<allVars>> result = table.getRowsByBtree("category", 10);
+
+    // SprawdŸ czy znaleziono dok³adnie 3 rekordy
+    ASSERT_EQ(result.size(), 3) << "Powinny zostaæ znalezione 3 rekordy z kategori¹ 10";
+
+    // SprawdŸ czy znalezione rekordy maj¹ odpowiednie wartoœci
+    EXPECT_TRUE(containsRecord(result, { 1, 10, std::string("Item1") }));
+    EXPECT_TRUE(containsRecord(result, { 3, 10, std::string("Item3") }));
+    EXPECT_TRUE(containsRecord(result, { 5, 10, std::string("Item5") }));
+
+    delete wal;
+}
+
+TEST(TableTests, GetRowsByBtreeEmptyResult) {
+    // Test dla nieistniej¹cej wartoœci
+    Wal* wal = new Wal();
+    wal->createDirectoryAndFile();
+    Table table("testEmptyResultTable", ".", wal);
+
+    // Dodaj kolumny
+    table.addColumn("id", int32_tId, false);
+    table.addColumn("name", stringId, false);
+
+    // Dodaj rekordy
+    table.addRecord({ 1, std::string("Test1") });
+    table.addRecord({ 2, std::string("Test2") });
+
+    // Dodaj indeks B-tree dla kolumny "name"
+    table.addBtree("name");
+
+    // Wyszukaj rekordy po nieistniej¹cej nazwie
+    std::vector<std::vector<allVars>> result = table.getRowsByBtree("name", std::string("NonExistent"));
+
+    // SprawdŸ czy wynik jest pusty
+    EXPECT_TRUE(result.empty()) << "Wynik powinien byæ pusty dla nieistniej¹cej wartoœci";
+
+    delete wal;
+}
+
+TEST(TableTests, GetRowsByBtreeWithMultipleBlocks) {
+    // Test z wieloma blokami danych
+    Wal* wal = new Wal();
+    wal->createDirectoryAndFile();
+    Table table("testMultiBlockTable", ".", wal);
+
+    // Dodaj kolumny
+    table.addColumn("id", int32_tId, false);
+    table.addColumn("group", int32_tId, false);
+    table.addColumn("data", stringId, false); // Du¿e dane, aby wymusiæ wiele bloków
+
+    // Dodaj du¿o rekordów, aby utworzyæ wiele bloków
+    const int RECORDS_COUNT = 100;
+
+    for (int i = 0; i < RECORDS_COUNT; i++) {
+        int group = i % 5; // 5 ró¿nych grup (0-4)
+        std::string largeData = "Data" + std::to_string(i) + std::string(300, 'X'); // Du¿e dane
+        table.addRecord({ i, group, largeData });
+    }
+
+    // SprawdŸ, czy rzeczywiœcie utworzono wiele bloków
+    ASSERT_GT(table.getDataBlocksSize(), 1) << "Test wymaga co najmniej 2 bloków danych";
+
+    // Dodaj indeks B-tree dla kolumny "group"
+    table.addBtree("group");
+
+    // Wyszukaj rekordy z group=2
+    std::vector<std::vector<allVars>> result = table.getRowsByBtree("group", 2);
+
+    // Powinno byæ oko³o RECORDS_COUNT/5 rekordów z group=2
+    int expectedCount = RECORDS_COUNT / 5;
+    EXPECT_EQ(result.size(), expectedCount) << "Oczekiwano oko³o " << expectedCount << " rekordów z group=2";
+
+    // SprawdŸ, czy wszystkie znalezione rekordy maj¹ group=2
+    for (const auto& record : result) {
+        ASSERT_GE(record.size(), 2) << "Rekord ma za ma³o elementów";
+        EXPECT_EQ(std::get<int32_t>(record[1]), 2) << "Znaleziony rekord ma nieprawid³ow¹ wartoœæ grupy";
+    }
+
+    delete wal;
+}
+
+TEST(TableTests, GetRowsByBtreeForInt64) {
+    // Test z kluczem typu int64_t
+    Wal* wal = new Wal();
+    wal->createDirectoryAndFile();
+    Table table("testInt64KeyTable", ".", wal);
+
+    // Dodaj kolumny
+    table.addColumn("id", int32_tId, false);
+    table.addColumn("bigValue", int64_tId, false);
+
+    // Dodaj rekordy z du¿ymi liczbami
+    int64_t largeValue1 = 9223372036854775807LL; // maksymalna wartoœæ int64_t
+    int64_t largeValue2 = 9223372036854775806LL;
+
+    table.addRecord({ 1, largeValue1 });
+    table.addRecord({ 2, largeValue2 });
+    table.addRecord({ 3, largeValue1 }); // duplikat wartoœci
+
+    // Dodaj indeks B-tree dla kolumny "bigValue"
+    table.addBtree("bigValue");
+
+    // Wyszukaj rekordy po maksymalnej wartoœci int64_t
+    std::vector<std::vector<allVars>> result = table.getRowsByBtree("bigValue", largeValue1);
+
+    // SprawdŸ czy znaleziono 2 rekordy
+    ASSERT_EQ(result.size(), 2) << "Powinny zostaæ znalezione 2 rekordy z maksymaln¹ wartoœci¹ int64_t";
+
+    // SprawdŸ czy znalezione rekordy maj¹ odpowiednie wartoœci
+    bool foundRecord1 = false, foundRecord3 = false;
+
+    for (const auto& record : result) {
+        ASSERT_GE(record.size(), 2) << "Rekord ma za ma³o elementów";
+        EXPECT_EQ(std::get<int64_t>(record[1]), largeValue1) << "Znaleziony rekord ma nieprawid³ow¹ wartoœæ int64_t";
+
+        if (std::get<int32_t>(record[0]) == 1) foundRecord1 = true;
+        if (std::get<int32_t>(record[0]) == 3) foundRecord3 = true;
+    }
+
+    EXPECT_TRUE(foundRecord1) << "Nie znaleziono rekordu z id=1";
+    EXPECT_TRUE(foundRecord3) << "Nie znaleziono rekordu z id=3";
+
+    delete wal;
+}
+
+TEST(TableTests, GetRowsByBtreePerformance) {
+    // Test wydajnoœci dla du¿ej liczby rekordów
+    Wal* wal = new Wal();
+    wal->createDirectoryAndFile();
+    Table table("testPerformanceTable", ".", wal);
+
+    // Dodaj kolumny
+    table.addColumn("id", int32_tId, false);
+    table.addColumn("key", int32_tId, false);
+    table.addColumn("data", stringId, false);
+
+    // Dodaj du¿¹ liczbê rekordów
+    const int RECORDS_COUNT = 1000;
+    const int TARGET_KEY = 42;
+    int targetCount = 0;
+
+    for (int i = 0; i < RECORDS_COUNT; i++) {
+        int key = i % 100; // 100 ró¿nych kluczy
+        std::string data = "Data" + std::to_string(i);
+
+        table.addRecord({ i, key, data });
+
+        if (key == TARGET_KEY) targetCount++;
+    }
+
+    // Dodaj indeks B-tree dla kolumny "key"
+    auto startTime = std::chrono::high_resolution_clock::now();
+    table.addBtree("key");
+    auto endBuildTime = std::chrono::high_resolution_clock::now();
+
+    // Wyszukaj rekordy z key=TARGET_KEY
+    auto startSearchTime = std::chrono::high_resolution_clock::now();
+    std::vector<std::vector<allVars>> result = table.getRowsByBtree("key", TARGET_KEY);
+    auto endSearchTime = std::chrono::high_resolution_clock::now();
+
+    // Oblicz czasy
+    std::chrono::duration<double> buildTime = endBuildTime - startTime;
+    std::chrono::duration<double> searchTime = endSearchTime - startSearchTime;
+
+    std::cout << "Czas budowania B-tree dla " << RECORDS_COUNT << " rekordów: "
+        << buildTime.count() << " sekund" << std::endl;
+    std::cout << "Czas wyszukiwania " << targetCount << " rekordów: "
+        << searchTime.count() << " sekund" << std::endl;
+
+    // SprawdŸ wyniki
+    ASSERT_EQ(result.size(), targetCount) << "Znaleziono nieprawid³ow¹ liczbê rekordów";
+
+    // SprawdŸ czy wszystkie znalezione rekordy maj¹ key=TARGET_KEY
+    for (const auto& record : result) {
+        ASSERT_GE(record.size(), 2) << "Rekord ma za ma³o elementów";
+        EXPECT_EQ(std::get<int32_t>(record[1]), TARGET_KEY) << "Znaleziony rekord ma nieprawid³ow¹ wartoœæ klucza";
+    }
+
+    // Oczekujemy, ¿e wyszukiwanie z u¿yciem B-tree bêdzie szybkie
+    EXPECT_LT(searchTime.count(), 0.1) << "Wyszukiwanie z B-tree powinno byæ szybkie (< 100ms)";
+
+    delete wal;
 }
 
 TEST(TableTests, ConstructorWithValidParameters) {
@@ -324,7 +584,7 @@ TEST(TableTests, AddBTreeAndGetBlockNum) {
 }
 
 
-
+/*
 // Test sprawdzaj¹cy dzia³anie addBtree dla nieistniej¹cej kolumny
 TEST(TableTests, AddBTreeForNonExistentColumn) {
     Wal* wal = new Wal();
@@ -462,3 +722,4 @@ TEST(TableTests, BTreePerformance) {
 
     delete wal;
 }
+*/

@@ -135,12 +135,12 @@ public:
         }
     }
     
-    int getBlockNum(std::string columnName, allVars data) {
+    std::vector<int> getBlockNum(std::string columnName, allVars data) {
         for (int i = 0; i < dataBlocks.size(); i++) {
             if (dataBlocks[i].ifColumnExists(columnName)) {
                 for (int j = 0; j < bTreeManagers.size(); j++) {
                     if (bTreeManagers[j]->getColumnIndex() == dataBlocks[i].getColumnIndex(columnName)) {
-						//return bTreeManagers[j]->getBlockNum(data);
+						return bTreeManagers[j]->getBlockNum(data);
                     }
                 }
                 
@@ -149,7 +149,44 @@ public:
                 //assert column dont exists 
             }
         }
-        return 0;
+        //return 0;
+    }
+    std::vector<std::vector<allVars>>getRowsByBtree(std::string columnName, allVars data) {
+        std::vector<std::vector<allVars>>records;
+        std::vector<int>blockNumbers = getBlockNum(columnName, data);
+        for (int i = 0; i < dataBlocks.size(); i++) {
+            for (int j = 0; j < blockNumbers.size(); j++) {
+                if (dataBlocks[i].getBlockNum() == blockNumbers[j]) {
+                    int index = dataBlocks[i].getColumnIndex(columnName);
+                    for (int k = 0; k < dataBlocks[i].getRecords().size(); k++) {
+                        if (dataBlocks[i].getRecords()[k][index] == data) {
+                            records.push_back(dataBlocks[i].getRecords()[k]);
+                        }
+                    }
+                    break;
+                }
+
+            }
+        }
+        return records;
+        //std::vector<std::vector<allVars>>getRowsByBtreeDiffrentThenQ(std::string columnName, allVars data, std::string op) {
+
+        //}
+    }
+
+    bool ifBtreeColumnExists(std::string columName) {
+        int index = 0;
+        for (int i = 0; i < dataBlocks.size(); i++) {
+			if (dataBlocks[i].ifColumnExists(columName)) {
+				index = dataBlocks[i].getColumnIndex(columName);
+				for (int j = 0; j < bTreeManagers.size(); j++) {
+					if (bTreeManagers[j]->getColumnIndex() == index) {
+						return true;
+					}
+				}
+			}
+        }
+		return false;
     }
     
     
