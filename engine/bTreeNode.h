@@ -6,7 +6,6 @@
 #include <string> 
 #include <algorithm>
 
-
 template <typename T>
 class BtreeNode {
 private:
@@ -16,137 +15,30 @@ private:
     int t;
 
 public:
-    BtreeNode(int t) {
-        this->t = t;
-    }
+    BtreeNode(int t);
 
-    std::vector<std::pair<T, std::vector<int>>> getNames() {
-        return names;
-    }
+    std::vector<std::pair<T, std::vector<int>>> getNames();
 
-    void replaceChild(int i, BtreeNode<T>* child) {
-        if (i < childrens.size()) {
-            childrens[i] = child;
-        }
-        else {
-            std::cout << "Index out of bounds" << std::endl;
-        }
-    }
+    void replaceChild(int i, BtreeNode<T>* child);
 
-    std::vector<BtreeNode<T>*> getChildrens() {
-        return childrens;
-    }
+    std::vector<BtreeNode<T>*> getChildrens();
 
-    T getName() {
-        return names[0].first;
-    }
+    T getName();
 
-    void addChildAtPos(int i, BtreeNode<T>* child) {
-        childrens.insert(childrens.begin() + i, child);
-    }
+    void addChildAtPos(int i, BtreeNode<T>* child);
 
-    void addChild(BtreeNode<T>* child) {
-        childrens.push_back(child);
-    }
+    void addChild(BtreeNode<T>* child);
 
-    void addName(T name, int dataBlock) {
-        bool isAlready = false;
-        for (size_t i = 0; i < names.size(); i++) {
-            if (names[i].first == name) {
-                isAlready = true;
-                names[i].second.push_back(dataBlock);
-                break;
-            }
-        }
-        if (isAlready == false) {
-            std::vector<int> blocks = { dataBlock };
-            names.push_back({ name, blocks });
-        }
-        std::sort(names.begin(), names.end(), [](const std::pair<T, std::vector<int>>& a, const std::pair<T, std::vector<int>>& b) {
-            return a.first < b.first;
-            });
-    }
+    void addName(T name, int dataBlock);
 
-    void insert(T data, int blockNum, std::vector<BtreeNode<T>*> path, BtreeNode<T>*& root) {
-        traverse(path, root, data, blockNum);
-    }
+    void insert(T data, int blockNum, std::vector<BtreeNode<T>*> path, BtreeNode<T>*& root);
 
-    std::pair<T, std::vector<int>> splitNode(BtreeNode<T>* node, std::vector<BtreeNode<T>*> path, BtreeNode<T>*& root) {
-        BtreeNode<T>* b1 = new BtreeNode<T>(t);
-        BtreeNode<T>* b2 = new BtreeNode<T>(t);
-        std::vector<std::pair<T, std::vector<int>>> tmpNames = node->getNames();
+    std::pair<T, std::vector<int>> splitNode(BtreeNode<T>* node, std::vector<BtreeNode<T>*> path, BtreeNode<T>*& root);
 
-        for (size_t i = 0; i < node->getNames().size(); i++) {
-            if (i < node->getNames().size() / 2) {
-                for (int blockNum : tmpNames[i].second) {
-                    b1->addName(tmpNames[i].first, blockNum);
-                }
-            }
-            else if (i > node->getNames().size() / 2) {
-                for (int blockNum : tmpNames[i].second) {
-                    b2->addName(tmpNames[i].first, blockNum);
-                }
-            }
-        }
-
-        auto tmpChildrens = node->getChildrens();
-        if (!tmpChildrens.empty()) {
-            for (size_t j = 0; j <= b1->getNames().size(); j++) {
-                if (j < tmpChildrens.size()) {
-                    b1->addChild(tmpChildrens[j]);
-                }
-            }
-
-            for (size_t j = b1->getNames().size() + 1; j < tmpChildrens.size(); j++) {
-                b2->addChild(tmpChildrens[j]);
-            }
-        }
-
-        BtreeNode<T>* middle = new BtreeNode<T>(t);
-        T middleValue = tmpNames[node->getNames().size() / 2].first;
-        std::vector<int> middleBlocks = tmpNames[node->getNames().size() / 2].second;
-
-        for (int blockNum : middleBlocks) {
-            middle->addName(middleValue, blockNum);
-        }
-
-        middle->addChild(b1);
-        middle->addChild(b2);
-
-        std::cout << "path.size() : " << static_cast<int>(path.size()) << " " << static_cast<int>(path.size()) - 2 << std::endl;
-
-        if (static_cast<int>(path.size()) - 2 >= 0) {
-            for (size_t k = 0; k < path[path.size() - 2]->getChildrens().size(); k++) {
-                if (path[path.size() - 2]->getChildrens()[k] == node) {
-                    path[path.size() - 2]->replaceChild(k, b1);
-                    path[path.size() - 2]->addChildAtPos(k + 1, b2);
-                    break;
-                }
-            }
-        }
-        else {
-            root = middle;
-        }
-
-        return { middleValue, middleBlocks };
-    }
-
-    void traverse(std::vector<BtreeNode<T>*> path, BtreeNode<T>*& root, T data, int blockData) {
-        if (path.empty()) {
-            return;
-        }
-
-        path[path.size() - 1]->addName(data, blockData);
-
-        if (path[path.size() - 1]->getNames().size() >= static_cast<size_t>(t)) {
-            std::pair<T, std::vector<int>> newData = splitNode(path[path.size() - 1], path, root);
-            path.pop_back();
-            if (!path.empty()) {
-                // U¿yj tylko pierwszego bloku z kolekcji bloków do propagacji w górê
-                traverse(path, root, newData.first, newData.second[0]);
-            }
-        }
-    }
+    void traverse(std::vector<BtreeNode<T>*> path, BtreeNode<T>*& root, T data, int blockData);
 };
 
+#include "bTreeNode.cpp"
+
 #endif
+

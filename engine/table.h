@@ -90,104 +90,18 @@ public:
 
     std::vector<uint8_t> marshalTable();
 
-    std::vector<int64_t>getBlokcNum() {
-        std::vector<int64_t>nums;
-        for (int i = 0; i < dataBlocks.size(); i++) {
-            nums.push_back(dataBlocks[i].getBlockNum());
-        }
-        return nums;
-    }
+    std::vector<int64_t>getBlokcNum();
 
     //std::vector<DataBlock> getBlocks() {
 	//	return dataBlocks;
     //}
 
-    void addBtree(std::string columnName) {
-        for (int i = 0; i < dataBlocks.size(); i++) {
-            for (int w = 0; w < dataBlocks.size(); w++) {
-                std::cout << w << " " << dataBlocks[w].getBlockNum() << std::endl;
-            }
-            if (dataBlocks[i].ifColumnExists(columnName)) {
-                int index = dataBlocks[i].getColumnIndex(columnName);
-                // Tworzymy wektor par <allVars, int>
-                //std::vector<std::pair<allVars, int>> namesVector;
-                // Dodajemy parê (columnName przekonwertowane na allVars, numer bloku)
-                //namesVector.push_back({ columnName, static_cast<int>(dataBlocks[i].getBlockNum()) });
-                BtreeManager<allVars>* bTreeManager = new BtreeManager<allVars>(3, tableName, index);
-                for (int j = 0; j < dataBlocks.size(); j++) {
-                    std::vector<allVars> columnValues;
-					columnValues = dataBlocks[j].getColumnValues(columnName);
-                    /*
-                    std::cout << "--------------" << std::endl;
-                    for (int i = 0; i < columnValues.size(); i++) {
-                        showVariantVariable(columnValues[i]);
-                    }
-                    std::cout << "--------------" << std::endl;
-                    */
-					for (int k = 0; k < columnValues.size(); k++) {
-						bTreeManager->insert(columnValues[k], dataBlocks[j].getBlockNum());
-					}
-                }
-                bTreeManagers.push_back(bTreeManager);
-                //bTreeManager->createBtree();
-                break;
-            }
-        }
-    }
+    void addBtree(std::string columnName);
     
-    std::vector<int> getBlockNum(std::string columnName, allVars data) {
-        for (int i = 0; i < dataBlocks.size(); i++) {
-            if (dataBlocks[i].ifColumnExists(columnName)) {
-                for (int j = 0; j < bTreeManagers.size(); j++) {
-                    if (bTreeManagers[j]->getColumnIndex() == dataBlocks[i].getColumnIndex(columnName)) {
-						return bTreeManagers[j]->getBlockNum(data);
-                    }
-                }
-                
-            }
-            else {
-                //assert column dont exists 
-            }
-        }
-        //return 0;
-    }
-    std::vector<std::vector<allVars>>getRowsByBtree(std::string columnName, allVars data) {
-        std::vector<std::vector<allVars>>records;
-        std::vector<int>blockNumbers = getBlockNum(columnName, data);
-        for (int i = 0; i < dataBlocks.size(); i++) {
-            for (int j = 0; j < blockNumbers.size(); j++) {
-                if (dataBlocks[i].getBlockNum() == blockNumbers[j]) {
-                    int index = dataBlocks[i].getColumnIndex(columnName);
-                    for (int k = 0; k < dataBlocks[i].getRecords().size(); k++) {
-                        if (dataBlocks[i].getRecords()[k][index] == data) {
-                            records.push_back(dataBlocks[i].getRecords()[k]);
-                        }
-                    }
-                    break;
-                }
+    std::vector<int> getBlockNum(std::string columnName, allVars data);
+    std::vector<std::vector<allVars>>getRowsByBtree(std::string columnName, allVars data);
 
-            }
-        }
-        return records;
-        //std::vector<std::vector<allVars>>getRowsByBtreeDiffrentThenQ(std::string columnName, allVars data, std::string op) {
-
-        //}
-    }
-
-    bool ifBtreeColumnExists(std::string columName) {
-        int index = 0;
-        for (int i = 0; i < dataBlocks.size(); i++) {
-			if (dataBlocks[i].ifColumnExists(columName)) {
-				index = dataBlocks[i].getColumnIndex(columName);
-				for (int j = 0; j < bTreeManagers.size(); j++) {
-					if (bTreeManagers[j]->getColumnIndex() == index) {
-						return true;
-					}
-				}
-			}
-        }
-		return false;
-    }
+    bool ifBtreeColumnExists(std::string columName);
     
     
 };
