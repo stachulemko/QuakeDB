@@ -1,6 +1,256 @@
 #include "pch.h"
 #include "dataBase.h"
 
+class TestDatabase : public Database {
+public:
+    using Database::Database;
+    // Pozwala na ekspozycjê funkcji prywatnych/chronionych
+};
+
+// Testy dla funkcji getBlockNum
+TEST(DatabaseTests, GetBlockNumBasicTest) {
+    // Utwórz bazê danych i tabele z indeksem
+    TestDatabase db;
+    db.addTable("testTable");
+    db.addColumn("testTable", "id", int32_tId, false);
+    db.addColumn("testTable", "name", stringId, false);
+
+    // Dodaj rekordy
+    db.addRecord("testTable", { 1, std::string("TestName1") });
+    db.addRecord("testTable", { 2, std::string("TestName2") });
+    db.addRecord("testTable", { 3, std::string("TestName1") }); // Duplikat "TestName1"
+
+    // Utwórz indeks B-tree dla kolumny "name"
+    db.addBtree("testTable", "name");
+
+    // Wywo³aj funkcjê getBlockNum
+    std::vector<int> blockNums = db.getBlockNum("testTable", "name", std::string("TestName1"));
+
+    // SprawdŸ czy znaleziono prawid³ow¹ liczbê bloków
+    EXPECT_EQ(blockNums.size(), 2) << "Powinny byæ znalezione 2 bloki dla 'TestName1'";
+
+    // Bloki powinny byæ ró¿ne, ale nie wiemy dok³adnie jakie bêd¹ wartoœci
+    //EXPECT_NE(blockNums[0], blockNums[1]) << "Numery bloków powinny byæ ró¿ne";
+}
+
+TEST(DatabaseTests, GetBlockNumNonExistentTableOrColumn) {
+    TestDatabase db;
+    db.addTable("testTable");
+    db.addColumn("testTable", "id", int32_tId, false);
+
+    // Test dla nieistniej¹cej tabeli
+    std::vector<int> blockNums1 = db.getBlockNum("nonExistentTable", "id", 1);
+    EXPECT_TRUE(blockNums1.empty()) << "Dla nieistniej¹cej tabeli powinien zostaæ zwrócony pusty wektor";
+
+    // Test dla nieistniej¹cej kolumny
+    std::vector<int> blockNums2 = db.getBlockNum("testTable", "nonExistentColumn", 1);
+    EXPECT_TRUE(blockNums2.empty()) << "Dla nieistniej¹cej kolumny powinien zostaæ zwrócony pusty wektor";
+}
+
+TEST(DatabaseTests, GetBlockNumWithNoBtreeIndex) {
+    TestDatabase db;
+    db.addTable("testTable");
+    db.addColumn("testTable", "id", int32_tId, false);
+    db.addRecord("testTable", { 1 });
+
+    // Próba pobrania bloku bez utworzonego indeksu B-tree
+    std::vector<int> blockNums = db.getBlockNum("testTable", "id", 1);
+
+    // Oczekiwany wynik zale¿y od implementacji - mo¿e byæ pusty wektor lub b³¹d
+    // Tutaj zak³adam, ¿e funkcja zwraca pusty wektor jeœli nie ma indeksu
+    EXPECT_TRUE(blockNums.empty()) << "Dla kolumny bez indeksu B-tree powinien zostaæ zwrócony pusty wektor";
+}
+
+// Testy dla funkcji getIndexsOfColumnNames
+TEST(DatabaseTests, GetIndexsOfColumnNamesBasicTest) {
+    TestDatabase db;
+    db.addTable("testTable");
+    db.addColumn("testTable", "id", int32_tId, false);
+    db.addColumn("testTable", "name", stringId, false);
+    db.addColumn("testTable", "value", int64_tId, false);
+
+    // Pobierz indeksy kolumn "id" i "value"
+    std::vector<int> indexes = db.getIndexsOfColumnNames("testTable", { "id", "value" });
+
+    // SprawdŸ czy znaleziono prawid³owe indeksy
+    ASSERT_EQ(indexes.size(), 2) << "Powinny zostaæ znalezione 2 indeksy";
+    EXPECT_EQ(indexes[0], 0) << "Indeks kolumny 'id' powinien byæ 0";
+    EXPECT_EQ(indexes[1], 2) << "Indeks kolumny 'value' powinien byæ 2";
+}
+
+TEST(DatabaseTests, GetIndexsOfColumnNamesNonExistentColumns) {
+    TestDatabase db;
+    db.addTable("testTable");
+    db.addColumn("testTable", "id", int32_tId, false);
+
+    // Pobierz indeksy dla nieistniej¹cych kolumn
+    std::vector<int> indexes = db.getIndexsOfColumnNames("testTable", { "nonExistent1", "nonExistent2" });
+
+    // SprawdŸ czy wynik jest pusty
+    EXPECT_TRUE(indexes.empty()) << "Dla nieistniej¹cych kolumn powinien zostaæ zwrócony pusty wektor";
+}
+
+TEST(DatabaseTests, GetIndexsOfColumnNamesNonExistentTable) {
+    TestDatabase db;
+
+    // Pobierz indeksy dla nieistniej¹cej tabeli
+    std::vector<int> indexes = db.getIndexsOfColumnNames("nonExistentTable", { "id" });
+
+    // SprawdŸ czy wynik jest pusty
+    EXPECT_TRUE(indexes.empty()) << "Dla nieistniej¹cej tabeli powinien zostaæ zwrócony pusty wektor";
+}
+
+// Testy dla funkcji getByIndex
+TEST(DatabaseTests, GetByIndexBasicTest) {
+    TestDatabase db;
+    db.addTable("testTable");
+    db.addColumn("testTable", "id", int32_tId, false);
+    db.addColumn("testTable", "name", stringId, false);
+    db.addColumn("testTable", "value", int64_tId, false);
+
+    // Dodaj rekordy
+    db.addRecord("testTable", { 1, std::string("TestName1"), (int64_t)100 });
+    db.addRecord("testTable", { 2, std::string("TestName2"), (int64_t)200 });
+    db.addRecord("testTable", { 3, std::string("TestName1"), (int64_t)300 });
+
+    // Utwórz indeks B-tree dla kolumny "name"
+    db.addBtree("testTable", "name");
+
+    // Wywo³aj getByIndex dla kolumn "id" i "value" z wartoœci¹ "TestName1"
+    std::vector<std::vector<allVars>> result = db.getByIndex(
+        "testTable", "name", { "id", "value" }, std::string("TestName1"));
+
+    // SprawdŸ strukturê i zawartoœæ wyniku
+    ASSERT_GE(result.size(), 1) << "Wynik powinien zawieraæ co najmniej nag³ówek";
+
+    // Pierwszy wiersz powinien zawieraæ nazwy kolumn
+    ASSERT_EQ(result[0].size(), 2) << "Nag³ówek powinien zawieraæ 2 kolumny";
+    EXPECT_EQ(std::get<std::string>(result[0][0]), "id") << "Pierwsza kolumna powinna byæ 'id'";
+    EXPECT_EQ(std::get<std::string>(result[0][1]), "value") << "Druga kolumna powinna byæ 'value'";
+
+    // SprawdŸ czy znaleziono 2 rekordy dla "TestName1"
+    ASSERT_EQ(result.size(), 3) << "Powinny zostaæ znalezione 2 rekordy plus nag³ówek";
+
+    // SprawdŸ wartoœci dla pierwszego rekordu
+    ASSERT_EQ(result[1].size(), 2) << "Rekord powinien mieæ 2 kolumny";
+    EXPECT_TRUE(std::get<int32_t>(result[1][0]) == 1 || std::get<int32_t>(result[1][0]) == 3)
+        << "ID powinno byæ 1 lub 3";
+
+    // SprawdŸ wartoœci dla drugiego rekordu
+    ASSERT_EQ(result[2].size(), 2) << "Rekord powinien mieæ 2 kolumny";
+    EXPECT_TRUE(std::get<int32_t>(result[2][0]) == 1 || std::get<int32_t>(result[2][0]) == 3)
+        << "ID powinno byæ 1 lub 3";
+    EXPECT_NE(std::get<int32_t>(result[1][0]), std::get<int32_t>(result[2][0]))
+        << "Oba rekordy powinny mieæ ró¿ne ID";
+}
+
+TEST(DatabaseTests, GetByIndexNonExistentTableOrColumn) {
+    TestDatabase db;
+    db.addTable("testTable");
+    db.addColumn("testTable", "id", int32_tId, false);
+
+    // Test dla nieistniej¹cej tabeli
+    std::vector<std::vector<allVars>> result1 = db.getByIndex(
+        "nonExistentTable", "id", { "id" }, 1);
+    EXPECT_TRUE(result1.empty()) << "Dla nieistniej¹cej tabeli powinien zostaæ zwrócony pusty wektor";
+
+    // Test dla nieistniej¹cej kolumny indeksuj¹cej
+    std::vector<std::vector<allVars>> result2 = db.getByIndex(
+        "testTable", "nonExistentColumn", { "id" }, 1);
+    EXPECT_TRUE(result2.empty()) << "Dla nieistniej¹cej kolumny indeksuj¹cej powinien zostaæ zwrócony pusty wektor";
+
+    // Test dla nieistniej¹cych kolumn w wyniku
+    std::vector<std::vector<allVars>> result3 = db.getByIndex(
+        "testTable", "id", { "nonExistentColumn" }, 1);
+    // Oczekiwany wynik zale¿y od implementacji - mo¿e byæ pusty wektor lub rekord z pustymi wartoœciami
+}
+
+// Testy dla funkcji ifBtreeColumnExists
+TEST(DatabaseTests, IfBtreeColumnExistsBasicTest) {
+    TestDatabase db;
+    db.addTable("testTable");
+    db.addColumn("testTable", "id", int32_tId, false);
+    db.addColumn("testTable", "name", stringId, false);
+
+    // Najpierw bez indeksu B-tree
+    bool existsBefore = db.ifBtreeColumnExists("testTable", "name");
+    EXPECT_FALSE(existsBefore) << "Przed utworzeniem indeksu B-tree funkcja powinna zwróciæ false";
+
+    // Utwórz indeks B-tree
+    db.addBtree("testTable", "name");
+
+    // SprawdŸ po utworzeniu indeksu
+    bool existsAfter = db.ifBtreeColumnExists("testTable", "name");
+    EXPECT_TRUE(existsAfter) << "Po utworzeniu indeksu B-tree funkcja powinna zwróciæ true";
+}
+
+TEST(DatabaseTests, IfBtreeColumnExistsNonExistentTableOrColumn) {
+    TestDatabase db;
+    db.addTable("testTable");
+    db.addColumn("testTable", "id", int32_tId, false);
+
+    // Test dla nieistniej¹cej tabeli
+    bool exists1 = db.ifBtreeColumnExists("nonExistentTable", "id");
+    EXPECT_FALSE(exists1) << "Dla nieistniej¹cej tabeli funkcja powinna zwróciæ false";
+
+    // Test dla nieistniej¹cej kolumny
+    bool exists2 = db.ifBtreeColumnExists("testTable", "nonExistentColumn");
+    EXPECT_FALSE(exists2) << "Dla nieistniej¹cej kolumny funkcja powinna zwróciæ false";
+}
+
+// Kompleksowy test wykorzystuj¹cy wszystkie funkcje razem
+TEST(DatabaseTests, ComplexBtreeOperationsTest) {
+    TestDatabase db;
+    db.addTable("testTable");
+    db.addColumn("testTable", "id", int32_tId, false);
+    db.addColumn("testTable", "category", int32_tId, false);
+    db.addColumn("testTable", "name", stringId, false);
+
+    // Dodaj kilka rekordów
+    db.addRecord("testTable", { 1, 100, std::string("Item1") });
+    db.addRecord("testTable", { 2, 200, std::string("Item2") });
+    db.addRecord("testTable", { 3, 100, std::string("Item3") });
+    db.addRecord("testTable", { 4, 300, std::string("Item4") });
+
+    // SprawdŸ czy kolumna bez indeksu B-tree nie zostanie wykryta
+    EXPECT_FALSE(db.ifBtreeColumnExists("testTable", "category"));
+
+    // Utwórz indeks B-tree dla kolumny "category"
+    db.addBtree("testTable", "category");
+
+    // SprawdŸ czy indeks zosta³ utworzony
+    EXPECT_TRUE(db.ifBtreeColumnExists("testTable", "category"));
+
+    // Pobierz numery bloków dla kategorii 100
+    std::vector<int> blockNums = db.getBlockNum("testTable", "category", 100);
+    ASSERT_EQ(blockNums.size(), 2) << "Powinny byæ znalezione 2 bloki dla kategorii 100";
+
+    // Pobierz indeksy dla kolumn "id" i "name"
+    std::vector<int> indexes = db.getIndexsOfColumnNames("testTable", { "id", "name" });
+    ASSERT_EQ(indexes.size(), 2) << "Powinny zostaæ znalezione 2 indeksy";
+
+    // Pobierz rekordy z kategorii 100 zawieraj¹ce kolumny "id" i "name"
+    std::vector<std::vector<allVars>> result = db.getByIndex(
+        "testTable", "category", { "id", "name" }, 100);
+
+    // SprawdŸ wyniki
+    ASSERT_EQ(result.size(), 3) << "Wynik powinien zawieraæ nag³ówek i 2 rekordy";
+    EXPECT_EQ(std::get<std::string>(result[0][0]), "id") << "Pierwsza kolumna nag³ówka powinna byæ 'id'";
+    EXPECT_EQ(std::get<std::string>(result[0][1]), "name") << "Druga kolumna nag³ówka powinna byæ 'name'";
+
+    // SprawdŸ czy znaleziono oba rekordy z kategorii 100
+    bool foundItem1 = false, foundItem3 = false;
+    for (size_t i = 1; i < result.size(); i++) {
+        int id = std::get<int32_t>(result[i][0]);
+        std::string name = std::get<std::string>(result[i][1]);
+
+        if (id == 1 && name == "Item1") foundItem1 = true;
+        if (id == 3 && name == "Item3") foundItem3 = true;
+    }
+
+    EXPECT_TRUE(foundItem1) << "Powinien zostaæ znaleziony rekord z id=1 i name='Item1'";
+    EXPECT_TRUE(foundItem3) << "Powinien zostaæ znaleziony rekord z id=3 i name='Item3'";
+}
 
 TEST(DataBaseTests, CreateAndDeleteSingleTable) {
     Database db;

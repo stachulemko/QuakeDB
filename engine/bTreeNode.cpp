@@ -144,6 +144,32 @@ void BtreeNode<T>::traverse(std::vector<BtreeNode<T>*> path, BtreeNode<T>*& root
         }
     }
 }
+/*
+template <typename T>
+std::vector<uint8_t> BtreeNode<T>::marshall() {
+    std::vector<uint8_t> all;
+    std::vector<uint8_t>*typeNode = marshalInt32_t(nodeId);
+    all.insert(all.end(), typeNode->begin(), typeNode->end());
+    btreeNodeSize += 4;
+    int32_t nodeSize = 0;
+    for (int i = 0; i < names.size(); i++) {
+        nodeSize += names[i].size() + 8;
+    }
+    std::vector<uint8_t>* sizeNode = marshalInt32_t(nodeSize);
+    all.insert(all.end(), sizeNode->begin(), sizeNode->end());
+    btreeNodeSize += 4;
+    std::vector<uint8_t>namesBinary;
+    for (int i = 0; i < names.size(); i++) {
+        Tlv nameTlv(names[i]);//.marshalTlv();
+        btreeNodeSize += nameTlv.getTlvSize();
+        std::vector<uint8_t>nameBinary = nameTlv.marshalTlv() ;
+        
+        all.insert(all.end(), nameBinary.begin(), nameBinary.end());
+    }
+    return all;
+}
+*/
+
 
 #endif
 

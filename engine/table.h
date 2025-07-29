@@ -102,6 +102,23 @@ public:
     std::vector<std::vector<allVars>>getRowsByBtree(std::string columnName, allVars data);
 
     bool ifBtreeColumnExists(std::string columName);
+
+    std::vector<uint8_t>marshallBtrees() {
+        std::vector<uint8_t> result;
+        for (auto& btree : bTreeManagers) {
+            Tlv index(int32_t(btree->getColumnIndex()));
+            std::vector<uint8_t> btreeBytes = index.marshalTlv();
+            result.insert(result.end(), btreeBytes.begin(), btreeBytes.end());
+        }
+        return result;
+    }
+    std::string getColumnNameByIndex(int32_t index) {
+        for (int i = 0; i < dataBlocks.size(); i++) {
+            if (dataBlocks[i].getColumnNameByIndex(index)!="") {
+				return dataBlocks[i].getColumnNameByIndex(index);
+            }
+        }
+    }
     
     
 };

@@ -3,30 +3,18 @@
 #include "tlv.h"
 #include "dataBase.h"
 int main() {
-    
-    /*
-    Database d1;
-    d1.addTable("klienci");
-    d1.addColumn("klienci","data",int32_tId,true);
-    d1.addColumn("klienci", "klient", stringId, true);
-    d1.addRecord("klienci", { 1,"janek" });
-    d1.addRecord("klienci", { 2,"zyd" });
-    d1.addRecord("klienci", { 1,"niger" });
-    d1.commit();
-    */
-    //Database loadDb;
-    //loadDb.loadDataBase();
-    //loadDb.select("testTable", { "*" }).showSqQuery();
-    //loadDb.addBtree("klienci", "data");
-    //std::vector<int> blokcNums = loadDb.getBlockNum("klienci", "data", 1);
     Database db;
-    db.loadDataBase();
-	db.addBtree("klienci", "data");
-	//std::vector < std::vector <allVars>> vec = db.g("klienci", "data", { "data", "klient" }, 1);
-    db.select("klienci", { "data", "klient" });
-    db.where("data", "=", 1);
-    db.showSqQuery();
+	db.addTable("testTable");
+	db.addColumn("testTable", "id", int32_tId, false);
+	db.addColumn("testTable", "name", stringId, false);
+	db.addRecord("testTable", { 1, "TestName1" });
+	db.addRecord("testTable", { 2, "TestName2" });
+	db.addRecord("testTable", { 3, "TestName1" }); // Duplikat "TestName1"
+	db.commit();
+	db.select("testTable", { "id","name" }).showSqQuery();
 
-    
-    
+
+    // Oczekiwany wynik zale¿y od implementacji - mo¿e byæ pusty wektor lub b³¹d
+    // Tutaj zak³adam, ¿e funkcja zwraca pusty wektor jeœli nie ma indeksu
+    //EXPECT_TRUE(blockNums.empty()) << "Dla kolumny bez indeksu B-tree powinien zostaæ zwrócony pusty wektor";
 }

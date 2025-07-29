@@ -244,6 +244,7 @@ std::vector<int> Database::getBlockNum(std::string tableName, std::string column
             //assert not exist table - later !! 
         }
     }
+	return std::vector<int>(); 
 }
 
 

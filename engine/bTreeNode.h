@@ -5,6 +5,9 @@
 #include <iostream>
 #include <string> 
 #include <algorithm>
+#include "typeManager.h"
+#include "binaryConverter.h"
+#include "tlv.h"
 
 template <typename T>
 class BtreeNode {
@@ -12,10 +15,15 @@ private:
     // int - klucz, std::vector<int> - numery bloków dla danego klucza
     std::vector<std::pair<T, std::vector<int>>> names;
     std::vector<BtreeNode<T>*> childrens;
+    int32_t btreeNodeSize = 0;
     int t;
 
 public:
     BtreeNode(int t);
+
+	int32_t getBtreeNodeSize() {
+		return btreeNodeSize;
+	}
 
     std::vector<std::pair<T, std::vector<int>>> getNames();
 
@@ -36,6 +44,10 @@ public:
     std::pair<T, std::vector<int>> splitNode(BtreeNode<T>* node, std::vector<BtreeNode<T>*> path, BtreeNode<T>*& root);
 
     void traverse(std::vector<BtreeNode<T>*> path, BtreeNode<T>*& root, T data, int blockData);
+
+    //std::vector<uint8_t> marshall();
+
+    
 };
 
 #include "bTreeNode.cpp"

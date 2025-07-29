@@ -66,6 +66,12 @@ public:
         }
         return -1;
     }
+	std::string getColumnNameByIndex(int index) {
+		if (index >= 0 && index < columns.size()) {
+			return columns[index]->getColumnName();
+		}
+		return "";
+	}
 
     std::vector<allVars> getColumnValues(std::string columnName) {
 		int index = getColumnIndex(columnName);
