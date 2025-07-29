@@ -3,18 +3,28 @@
 #include "tlv.h"
 #include "dataBase.h"
 int main() {
-    Database db;
-	db.addTable("testTable");
-	db.addColumn("testTable", "id", int32_tId, false);
-	db.addColumn("testTable", "name", stringId, false);
-	db.addRecord("testTable", { 1, "TestName1" });
-	db.addRecord("testTable", { 2, "TestName2" });
-	db.addRecord("testTable", { 3, "TestName1" }); // Duplikat "TestName1"
+	/*
+	Database db;
+	// Example usage
+	db.addTable("Users");
+	db.addColumn("Users", "id", int32_tId, false);
+	db.addColumn("Users", "name", stringId, true);
+
+	db.addRecord("Users", { 1, std::string("Alice") });
+	db.addRecord("Users", { 2, std::string("Bob") });
+	db.addRecord("Users", { 1, std::string("Charlie") });
+	db.addRecord("Users", { 1, std::string("Charlie") });
+	db.addBtree("Users", "id");
 	db.commit();
-	db.select("testTable", { "id","name" }).showSqQuery();
+	*/
 
 
-    // Oczekiwany wynik zale¿y od implementacji - mo¿e byæ pusty wektor lub b³¹d
-    // Tutaj zak³adam, ¿e funkcja zwraca pusty wektor jeœli nie ma indeksu
-    //EXPECT_TRUE(blockNums.empty()) << "Dla kolumny bez indeksu B-tree powinien zostaæ zwrócony pusty wektor";
+	Database loadDb;
+	loadDb.loadDataBase();
+	loadDb.select("Users", { "id", "name" });
+	loadDb.where("id", "=", 1);
+	loadDb.showSqQuery();
+
+	//db.select("Users", { "id", "name" }).where("name", "=", std::string("Alice")).showSqQuery();
+	//return 0;
 }

@@ -90,16 +90,18 @@ public:
                     std::string fileName = entry.path().filename().string();
                     std::vector<uint8_t> fileBytes = readFileBytes(entry.path().string());
                     int index = 0;
-                    while (index+12 < fileBytes.size()) {
+                    while (index+12 <= fileBytes.size()) {
                         Tlv idexTlv(fileBytes);
                         idexTlv.decode();
                         const int32_t * columnIndex = idexTlv.getInt32Value();//variantToInt32(idexTlv.getValue());
                         for (int i = 0; i < tables.size(); i++) {
-                            if (tables[i]->getTableName() == fileName) {
+                            std::string correctFileName = fileName.substr(0, 5);
+                            if (tables[i]->getTableName() == correctFileName) {
 								int32_t tmp = *columnIndex;
 								addBtree(tables[i]->getTableName(), tables[i]->getColumnNameByIndex(tmp));
                             }
                         }
+                        index += 12;
                     }
                 }
             }
@@ -110,8 +112,8 @@ public:
     }
     void marshallBtree() {
         for (int i = 0; i < tables.size(); i++) {
-            if (!fs::is_directory(bTreePath)) {
-				addToFileBytes("bTreePath"+tables[i]->getTableName() + ".bin", tables[i]->marshallBtrees());
+            if (fs::is_directory(bTreePath)) {
+				addToFileBytes(bTreePath +"/"+tables[i]->getTableName() + ".bin", tables[i]->marshallBtrees());
             }
         }
     }

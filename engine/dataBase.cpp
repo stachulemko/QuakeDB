@@ -24,6 +24,7 @@ void Database::commit() {
         std::string tableName = table->getTableName();
         addToFileBytes(path + "/" + tableName + ".bin", vec);
     }
+    marshallBtree();
 }
 
 void Database::addTable(std::string tableName) {
@@ -186,6 +187,7 @@ void Database::loadDataBase() {
     catch (const fs::filesystem_error& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }
+	loadBtrees();   //new 
 }
 void Database::showWal() {
     wal->showWalData();
