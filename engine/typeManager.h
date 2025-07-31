@@ -12,6 +12,7 @@ const int32_t recordTypeId = 5;
 const int32_t insertTypeId = 6;
 const int32_t addColumnTypeId = 7;
 const int32_t blockId = 8;
+const int32_t relationId = 9;
 //const int32_t nodeId = 8;
 //const int32_t btreeId = 8;
 

@@ -1,4 +1,3 @@
-
 #include "column.h"
 #include "tlv.h"
 #include "dataBase.h"
@@ -17,14 +16,10 @@ int main() {
 	db.addBtree("Users", "id");
 	db.commit();
 	*/
-
-
-	Database loadDb;
-	loadDb.loadDataBase();
-	loadDb.select("Users", { "id", "name" });
-	loadDb.where("id", "=", 1);
-	loadDb.showSqQuery();
-
+	//Database db;
+	//addRelation("Users", "id", "Orders", "user_id" , "yes");
+	//addRelation("Users", "id", "Orders", "user_id" , "yes");
+	//db.commit();
 	//db.select("Users", { "id", "name" }).where("name", "=", std::string("Alice")).showSqQuery();
 	//return 0;
 }

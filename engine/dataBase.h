@@ -10,6 +10,7 @@
 #include "select.h"
 #include "where.h"
 #include "wal.h"
+//#include "relations.h"
 
 class Database {
 private:
@@ -82,41 +83,9 @@ public:
 
     bool ifBtreeColumnExists(std::string tableName, std::string columnName);
     
-    void loadBtrees() {
-        const std::string folder = bTreePath;
-        try {
-            for (const auto& entry : fs::directory_iterator(folder)) {
-                if (!fs::is_directory(entry.status())) {
-                    std::string fileName = entry.path().filename().string();
-                    std::vector<uint8_t> fileBytes = readFileBytes(entry.path().string());
-                    int index = 0;
-                    while (index+12 <= fileBytes.size()) {
-                        Tlv idexTlv(fileBytes);
-                        idexTlv.decode();
-                        const int32_t * columnIndex = idexTlv.getInt32Value();//variantToInt32(idexTlv.getValue());
-                        for (int i = 0; i < tables.size(); i++) {
-                            std::string correctFileName = fileName.substr(0, 5);
-                            if (tables[i]->getTableName() == correctFileName) {
-								int32_t tmp = *columnIndex;
-								addBtree(tables[i]->getTableName(), tables[i]->getColumnNameByIndex(tmp));
-                            }
-                        }
-                        index += 12;
-                    }
-                }
-            }
-        }
-        catch (const fs::filesystem_error& e) {
-            std::cerr << "Error: " << e.what() << std::endl;
-        }
-    }
-    void marshallBtree() {
-        for (int i = 0; i < tables.size(); i++) {
-            if (fs::is_directory(bTreePath)) {
-				addToFileBytes(bTreePath +"/"+tables[i]->getTableName() + ".bin", tables[i]->marshallBtrees());
-            }
-        }
-    }
+    void loadBtrees();
+
+    void marshallBtree();
 };
 
 #endif
