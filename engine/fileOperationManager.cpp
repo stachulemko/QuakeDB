@@ -134,3 +134,22 @@ void clearFile(std::string path) {
         std::cerr << "Error while clearing file: " << e.what() << std::endl;
     }
 }
+
+double getSizeFile(const std::string& path) {
+    try {
+        if (!fs::exists(path)) {
+            std::cerr << "Error: File '" << path << "' does not exist!" << std::endl;
+            return 0.0;
+        }
+
+        uintmax_t sizeInBytes = fs::file_size(path);
+
+        double sizeInMB = static_cast<double>(sizeInBytes) / (1024.0 * 1024.0);
+
+        return sizeInMB;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error while getting file size: " << e.what() << std::endl;
+        return 0.0;
+    }
+}

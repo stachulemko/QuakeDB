@@ -25,7 +25,8 @@ void Database::commit() {
         addToFileBytes(path + "/" + tableName + ".bin", vec);
     }
     marshallBtree();
-    //marshallRelations // new 
+
+    marshallRelations();
 }
 
 void Database::addTable(std::string tableName) {
@@ -189,6 +190,7 @@ void Database::loadDataBase() {
         std::cerr << "Error: " << e.what() << std::endl;
     }
 	loadBtrees();   
+    loadRelations();
     //loadRelations(); // new 
 
 }

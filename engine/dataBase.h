@@ -10,7 +10,7 @@
 #include "select.h"
 #include "where.h"
 #include "wal.h"
-//#include "relations.h"
+#include "relations.h"
 
 class Database {
 private:
