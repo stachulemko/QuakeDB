@@ -11,6 +11,7 @@
 #include "where.h"
 #include "wal.h"
 #include "relations.h"
+#include "join.h"
 
 class Database {
 private:
@@ -22,6 +23,8 @@ private:
     std::vector<std::vector<allVars>> sqlQueryBytes;
     std::vector<std::vector<allVars>> AllTableBytes;
 	bool selectAcomplished = false;
+	bool joinAcomplished = false;
+	bool whereAcomplished = false;
 	std::string tmpTableName = "";
 	std::vector<std::string> tmpColumnNames;
 
@@ -53,7 +56,7 @@ public:
 
     Database &where(std::string columnName, std::string mathOperator, allVars ifValue);
 
-    Database& showSqQuery();
+    Database& showSqlQuery();
 
     void clearQueryVariables();
 
@@ -86,6 +89,54 @@ public:
     void loadBtrees();
 
     void marshallBtree();
+
+
+    bool isTableExists(std::string tableName) {
+        for (auto table : tables) {
+            if (table->getTableName() == tableName) {
+                return true;
+            }
+        }
+        //assert here
+        return false;
+    }
+    bool isColumnExists(std::string tableName, std::string columnName) {
+        for (auto table : tables) {
+            if (table->getTableName() == tableName) {
+                for (auto column : table->getColumnName()) {
+                    if (column == columnName) {
+                        return true;
+                    }
+                }
+            }
+        }
+        //assert here
+        return false;
+    }
+    bool isTableAndColumnExists(std::string tableName, std::string columnName) {
+        if (isTableExists(tableName) && isColumnExists(tableName, columnName)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+        //assert here
+    }
+
+
+
+    void addRelation(std::string tableName, std::string columnName, std::string foreignTableName, std::string foreignColumnName, std::string onDelete) {
+        if (isTableAndColumnExists(tableName, columnName) && isTableAndColumnExists(foreignTableName, foreignColumnName)) {
+            addRelation(tableName, columnName, foreignTableName, foreignColumnName, onDelete);
+        }
+        
+    }
+    
+
+    Database& innerJoin(std::string secondTableName, std::string secondTableColumnName, std::string firstTableColumnName);
+
+
+
 };
 
 #endif

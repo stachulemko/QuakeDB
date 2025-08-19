@@ -8,6 +8,7 @@
 #include "binaryConverter.h"
 #include "typeManager.h"
 #include "tlv.h"
+#include "dataBase.h"
 
 class Relation {
 private:

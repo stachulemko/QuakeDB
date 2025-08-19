@@ -1,8 +1,4 @@
 #include "pch.h"
-#include "relation.h "
 
 
-
-TEST(relationsTests , ) {
-
-}
+// Test podstawowej funkcjonalnoœci konstruktora Relation

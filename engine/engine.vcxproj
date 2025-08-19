@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="aggregates.cpp" />
     <ClCompile Include="binaryConverter.cpp" />
     <ClCompile Include="bTree.cpp" />
     <ClCompile Include="bTreeManager.cpp" />
@@ -27,12 +28,19 @@
     <ClCompile Include="dataBase.cpp" />
     <ClCompile Include="dataBlock.cpp" />
     <ClCompile Include="fileOperationManager.cpp" />
+    <ClCompile Include="groupBy.cpp" />
+    <ClCompile Include="join.cpp" />
+    <ClCompile Include="leftJoin.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="orderBy.cpp" />
+    <ClCompile Include="queryExecutor.cpp" />
     <ClCompile Include="record.cpp" />
     <ClCompile Include="relation.cpp" />
     <ClCompile Include="relations.cpp" />
+    <ClCompile Include="rightJoin.cpp" />
     <ClCompile Include="select.cpp" />
     <ClCompile Include="simpleOperations.cpp" />
+    <ClCompile Include="sqlParser.cpp" />
     <ClCompile Include="table.cpp" />
     <ClCompile Include="tlv.cpp" />
     <ClCompile Include="typeManager.cpp" />
@@ -40,6 +48,7 @@
     <ClCompile Include="where.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aggregates.h" />
     <ClInclude Include="binaryConverter.h" />
     <ClInclude Include="bTree.h" />
     <ClInclude Include="bTreeManager.h" />
@@ -48,11 +57,18 @@
     <ClInclude Include="dataBase.h" />
     <ClInclude Include="dataBlock.h" />
     <ClInclude Include="fileOperationManager.h" />
+    <ClInclude Include="groupBy.h" />
+    <ClInclude Include="join.h" />
+    <ClInclude Include="leftJoin.h" />
+    <ClInclude Include="orderBy.h" />
+    <ClInclude Include="queryExecutor.h" />
     <ClInclude Include="record.h" />
     <ClInclude Include="relation.h" />
     <ClInclude Include="relations.h" />
+    <ClInclude Include="rightJoin.h" />
     <ClInclude Include="select.h" />
     <ClInclude Include="simpleOperations.h" />
+    <ClInclude Include="sqlParser.h" />
     <ClInclude Include="table.h" />
     <ClInclude Include="tlv.h" />
     <ClInclude Include="typeManager.h" />

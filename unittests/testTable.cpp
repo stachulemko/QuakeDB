@@ -28,7 +28,8 @@ bool containsRecord(const std::vector<std::vector<allVars>>& records, const std:
 
 TEST(TableTests, GetRowsByBtreeBasicTest) {
     // Utwórz tabelê z prostym schematem
-    Wal* wal = new Wal();
+    
+    Wal * wal = new Wal();
     wal->createDirectoryAndFile();
     Table table("testGetRowsTable", ".", wal);
 

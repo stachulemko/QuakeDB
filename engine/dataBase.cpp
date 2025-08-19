@@ -91,10 +91,12 @@ Database &Database::select(std::string tableName, std::vector<std::string> colum
 
 Database &Database::where(std::string columnName, std::string mathOperator, allVars ifValue) {
     if (mathOperator == "=" and ifBtreeColumnExists(tmpTableName,columnName) == true) {
+        whereAcomplished = true;
         sqlQueryBytes = getByIndex(tmpTableName, columnName, tmpColumnNames, ifValue);
     }
     else {
         if (selectAcomplished) {
+            whereAcomplished= true;
             sqlQueryBytes = whereFunc(AllTableBytes, sqlQueryBytes, columnName, mathOperator, ifValue);
         }
         else
@@ -103,11 +105,11 @@ Database &Database::where(std::string columnName, std::string mathOperator, allV
         }
         return *this;
     }
-
+    
 	
 }
 
-Database& Database::showSqQuery() {
+Database& Database::showSqlQuery() {
     if (selectAcomplished) {
         std::vector<std::vector<allVars>> selectedData = sqlQueryBytes;
         if (selectedData.empty()) {
@@ -353,4 +355,24 @@ void Database::marshallBtree() {
             addToFileBytes(bTreePath + "/" + tables[i]->getTableName() + ".bin", tables[i]->marshallBtrees());
         }
     }
+
+}
+
+Database& Database::innerJoin(std::string secondTableName, std::string secondTableColumnName, std::string firstTableColumnName) {
+    if (!whereAcomplished) {
+        std::vector<std::vector<allVars>> secTableData;
+        for (auto table : tables) {
+            if (table->getTableName() == secondTableName) {
+                secTableData = table->getTableDefinition();
+                break;
+            }
+        }
+        sqlQueryBytes = joinFunction(sqlQueryBytes, AllTableBytes, secTableData, secondTableColumnName, firstTableColumnName);
+        joinAcomplished = true;
+    }
+    else {
+        //assert here 
+    }
+    return *this;
+
 }

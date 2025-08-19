@@ -20,4 +20,6 @@ void marshallRelations();
 
 void loadRelations();
 
+void test35();
+
 #endif

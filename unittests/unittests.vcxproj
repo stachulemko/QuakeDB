@@ -63,7 +63,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\binaryConverter.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\tlv.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\column.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\table.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\fileOperationManager.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\dataBase.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\record.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\typeManager.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\select.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\simpleOperations.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\where.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\wal.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\dataBlock.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\bTree.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\bTreeNode.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\relation.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\relations.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.7\lib\native\v140\windesktop\msvcstl\static\rt-dyn\x64\Debug\gtest_maind.lib;C:\Users\KępkaStanisław\source\repos\QuakeDB\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.7\lib\native\v140\windesktop\msvcstl\static\rt-dyn\x64\Debug\gtestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\binaryConverter.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\tlv.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\column.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\table.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\fileOperationManager.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\dataBase.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\record.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\typeManager.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\select.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\simpleOperations.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\where.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\wal.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\dataBlock.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\bTree.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\bTreeNode.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\relation.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\relations.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\join.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\leftJoin.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\engine\x64\Debug\rightJoin.obj;C:\Users\KępkaStanisław\source\repos\QuakeDB\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.7\lib\native\v140\windesktop\msvcstl\static\rt-dyn\x64\Debug\gtest_maind.lib;C:\Users\KępkaStanisław\source\repos\QuakeDB\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.7\lib\native\v140\windesktop\msvcstl\static\rt-dyn\x64\Debug\gtestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -114,10 +114,13 @@
     </ClCompile>
     <ClCompile Include="testColumn.cpp" />
     <ClCompile Include="testDataBase.cpp" />
+    <ClCompile Include="testJoin.cpp" />
+    <ClCompile Include="testLeftJoin.cpp" />
     <ClCompile Include="testRecord.cpp" />
     <ClCompile Include="dataBaseSelect.cpp" />
     <ClCompile Include="testRelation.cpp" />
     <ClCompile Include="testRelations.cpp" />
+    <ClCompile Include="testRightJoin.cpp" />
     <ClCompile Include="testTable.cpp" />
     <ClCompile Include="testTlv.cpp" />
     <ClCompile Include="walTest.cpp" />

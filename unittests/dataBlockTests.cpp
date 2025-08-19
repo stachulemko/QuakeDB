@@ -1,4 +1,6 @@
+
 #include "pch.h"
+
 #include "dataBase.h"
 
 TEST(DataBlockTests, EmptyTableSingleBlock) {
@@ -16,6 +18,7 @@ TEST(DataBlockTests, EmptyTableSingleBlock) {
 
     deleteFile(db.getPath() + "/" + tableName + ".bin");
 }
+
 /*
 TEST(DataBlockTests, MultipleBlocksFor12KB) {
     Database db;

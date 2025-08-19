@@ -7,6 +7,7 @@ void addRelation(std::string tableName, std::string columnName, std::string fore
     //std::string path = "relations" + std::to_string(numberOfRelations);
     //createBinFile(folderPath, path);
     Relation relation(tableName, columnName, foreignTableName, foreignColumnName, onDelete);
+
     relations.push_back(relation);
 
 
@@ -55,7 +56,7 @@ void loadRelations() {
                         offset += 8;
 
                         if (offset + size <= fileBytes.size()) {
-                            std::vector<uint8_t> relationBytes(fileBytes.begin() + offset, fileBytes.begin() + offset + size);
+                            std::vector<uint8_t> relationBytes(fileBytes.begin() + offset-8, fileBytes.begin() + offset + size);
                             Relation relation("", "", "", "", "");
                             relation.decode(relationBytes);
                             relations.push_back(relation);
@@ -75,4 +76,8 @@ void loadRelations() {
     catch (...) {
         std::cerr << "Unknown error occurred during relation decoding" << std::endl;
     }
+}
+
+void test35() {
+    std::vector<Relation>test = relations;
 }
